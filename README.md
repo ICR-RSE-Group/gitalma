@@ -6,33 +6,35 @@ A utility for working with a group's gitlab and github repositories.
 Activate an environment first if required.
 ```bash
 python -m pip install git+https://github.com/ICR-RSE-Group/gitalma.git
+
+# uninstall
+python -m pip uninstall gitalma
 ```
+
 
 ## Quick start
 Documentation from [pydoctor is here](docs)
 
-### For command line,
+### For command line (the commands `gitlab` and `gitalma` are aliases of each other and interchangeable):
 ```bash
-git-alma init -subgroup 1234
-git-alma update
-git-alma status
-git-alma history
-gi-alma change -protocol pat
-git-alma change -autoupgrade N 
+gitalma init -subgroup 1234
+gitlab update
+gitalma status
+gitlab history
+gitalma change -protocol pat
+gitlab change -autoupgrade N 
 ```
 
 # Repos examples
-## Internal ICR
-git-alma init -subgroup 1234 -protocol pat
-git-alma init -subgroup 1234 -protocol https
-git-alma init -subgroup 1234 -protocol ssh
-
-## gitlab public, https://gitlab.com
+```bash
+# Internal ICR
+gitalma init -subgroup 1234 -protocol pat
+# gitlab public, https://gitlab.com
 git-alma init -subgroup 100000123 -protocol https -source gitlab
-
-## github public
+# github public
 git-alma init -protocol https -source github
-`and then edit the init.yml, e.g.`
+```
+and then edit the init.yml, e.g.
 ```yaml
 home: /home/ralcraft/dev/github-rse
 path: /home/ralcraft/dev/github-rse

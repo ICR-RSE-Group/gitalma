@@ -28,6 +28,8 @@ from .github import *
 from .scratch import Scratch
 from .versions import *
 
+__version__ = "0.1.0"
+
 def main():
     parser = argparse.ArgumentParser(description="GitLab pull or clone", 
         epilog="""
@@ -54,10 +56,10 @@ def main():
     parser.add_argument("--single", help="override multithreaded behaviour, stay in single thread.", action="store_true")
     parser.add_argument("--root", help="run from home path no matter where in the repo you are.", action="store_true")
     
-    args = parser.parse_args()             
+    args = parser.parse_args()
+    __version__ = get_gitalma_version()
     if args.version:        
-        print("GitAlma version:")
-        os.system("pip show gitalma | grep Version")
+        print("GitAlma version:", __version__)
         exit()
     
     start_time = datetime.datetime.now()            
@@ -87,16 +89,29 @@ def main():
         params[key] = repo_params[key]
     for key in clone_params:
         params[key] = clone_params[key]
-    print("===========================================")
-    print("===== GIT-ALMA from the ICR RSE Team =====")
-    print("===========================================")
-    print("-Config repo params-")
-    for key in repo_params:
-        print(f"\t{key}: {repo_params[key]}")
-    print("-Params entered-")    
-    for key in clone_params:
-        print(f"\t{key}: {clone_params[key]}")
-    print("=====================================")
+    if args.debug:
+        print("===========================================")
+        print("===== GIT-ALMA from the ICR RSE Team =====")
+        print("===========================================")
+        print("-Config repo params-")    
+        for key in repo_params:        
+            print(f"\t{key}: {repo_params[key]}")    
+        print("-Params entered-")    
+        for key in clone_params:
+            print(f"\t{key}: {clone_params[key]}")
+        print("=====================================")
+    else: #less verbose logging        
+        print("===== GITALMA from the ICR RSE Team =====")        
+        print("-Config repo params-")    
+        if "repo" in repo_params:        
+            print(f"\trepo: {repo_params['repo']}")    
+        if "path" in repo_params:        
+            print(f"\tpath: {repo_params['path']}")    
+        if "server" in repo_params:        
+            print(f"\tserver: {repo_params['server']}")
+        print("GitAlma version:", __version__)        
+        print("=====================================")
+
     #########################################################################################
     if "autoupgrade" in params:
         if params["autoupgrade"].upper() == "Y":

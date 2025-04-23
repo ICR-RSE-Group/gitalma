@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gitalma"
-version = "0.0.1"
+version = "0.0.2"
 description = "A library to work with gitlab on alma"
 authors = [{name = "RSE team", email = "rachel.alcraft@icr.ac.uk"}]
 
