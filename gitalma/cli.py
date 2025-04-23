@@ -104,10 +104,10 @@ def main():
         print("\n===== GITALMA from the ICR RSE Team =====")                
         if "repo" in repo_params:        
             print(f"repo: {repo_params['repo']}")    
-        if "path" in repo_params:        
-            print(f"path: {repo_params['path']}")    
-        if "server" in repo_params:        
+        elif "server" in repo_params:        
             print(f"server: {repo_params['server']}")
+        if "path" in repo_params:        
+            print(f"path: {repo_params['path']}")            
         print("GitAlma version:", __version__)        
         print("=====================================")
 
