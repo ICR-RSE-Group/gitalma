@@ -28,7 +28,8 @@ from .github import *
 from .scratch import Scratch
 from .versions import *
 
-__version__ = "0.1.0"
+thisversion = "0.0.0"
+gversion = "0.0.0"
 
 def main():
     parser = argparse.ArgumentParser(description="GitLab pull or clone", 
@@ -57,9 +58,11 @@ def main():
     parser.add_argument("--root", help="run from home path no matter where in the repo you are.", action="store_true")
     
     args = parser.parse_args()
-    __version__ = get_gitalma_version()
+    thisversion = get_gitalma_version()
+    gversion = get_github_version()
     if args.version:        
-        print("GitAlma version:", __version__)
+        print("GitAlma version:", thisversion)
+        print("Github version:", gversion)
         exit()
     
     start_time = datetime.datetime.now()            
