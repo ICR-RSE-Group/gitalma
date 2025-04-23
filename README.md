@@ -1,4 +1,4 @@
-# GitAlma
+# [GitAlma](https://github.com/ICR-RSE-Group/gitalma)
 
 A utility for working with a group's gitlab and github repositories.
 
@@ -13,7 +13,7 @@ python -m pip uninstall gitalma
 
 
 ## Quick start
-Documentation from [pydoctor is here](docs)
+Documentation from [pydoctor is here](https://github.com/ICR-RSE-Group/gitalma)
 
 ### For command line (the commands `gitlab` and `gitalma` are aliases of each other and interchangeable):
 ```bash
