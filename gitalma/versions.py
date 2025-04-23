@@ -9,7 +9,7 @@ def auto_update():
     if gh_v != a_v:
         print("github version: ", gh_v)
         print("Current version: ", a_v)
-        os.system("python -m pip install git+https://github.com/ICR-RSE-Group/gitalma.git@main#egg=gitalma -y")
+        os.system("python -m pip install git+https://github.com/ICR-RSE-Group/gitalma.git")
         #process = subprocess.run(["python","-m","pip", "install", "git+https://git.icr.ac.uk/sc-rse/group/resources/gitalma.git@main#egg=gitalma"],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         #strout = process.stdout.decode('utf-8').strip().split('\n')
         #changed = False
