@@ -8,18 +8,19 @@ def auto_update():
     a_v = get_gitalma_version()
     if gh_v != a_v:
         print("github version: ", gh_v)
-        print("Current version: ", a_v)        
-        process = subprocess.run(["python","-m","pip", "install", "git+https://git.icr.ac.uk/sc-rse/group/resources/gitalma.git@main#egg=gitalma"],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        strout = process.stdout.decode('utf-8').strip().split('\n')
-        changed = False
-        for line in strout:
-            if "Successfully installed" in line:
-                print(line)                
-                changed = True
-        if changed:
-            print("Updated gitalma")
-            os.system("python -m pip show gitalma | grep Version")
-            return True        
+        print("Current version: ", a_v)
+        os.system("python -m pip install git+https://git.icr.ac.uk/sc-rse/group/resources/gitalma.git@main#egg=gitalma -y")
+        #process = subprocess.run(["python","-m","pip", "install", "git+https://git.icr.ac.uk/sc-rse/group/resources/gitalma.git@main#egg=gitalma"],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        #strout = process.stdout.decode('utf-8').strip().split('\n')
+        #changed = False
+        #for line in strout:
+        #    if "Successfully installed" in line:
+        #        print(line)                
+        #        changed = True
+        #if changed:
+        #    print("Updated gitalma")
+        #    os.system("python -m pip show gitalma | grep Version")
+        return True        
     return False
         
 

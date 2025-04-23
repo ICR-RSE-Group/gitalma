@@ -101,14 +101,13 @@ def main():
             print(f"\t{key}: {clone_params[key]}")
         print("=====================================")
     else: #less verbose logging        
-        print("===== GITALMA from the ICR RSE Team =====")        
-        print("-Config repo params-")    
+        print("\n===== GITALMA from the ICR RSE Team =====")                
         if "repo" in repo_params:        
-            print(f"\trepo: {repo_params['repo']}")    
+            print(f"repo: {repo_params['repo']}")    
         if "path" in repo_params:        
-            print(f"\tpath: {repo_params['path']}")    
+            print(f"path: {repo_params['path']}")    
         if "server" in repo_params:        
-            print(f"\tserver: {repo_params['server']}")
+            print(f"server: {repo_params['server']}")
         print("GitAlma version:", __version__)        
         print("=====================================")
 
