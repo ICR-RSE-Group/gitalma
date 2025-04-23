@@ -111,7 +111,9 @@ def main():
             print(f"server: {repo_params['server']}")
         if "path" in repo_params:        
             print(f"path: {repo_params['path']}")            
-        print("GitAlma version:", __version__)        
+        print("GitAlma version:", thisversion)
+        if thisversion != gversion:
+            print("Github version:", gversion)   
         print("=====================================")
 
     #########################################################################################
