@@ -104,7 +104,7 @@ def main():
             print(f"\t{key}: {clone_params[key]}")
         print("=====================================")
     else: #less verbose logging        
-        print("\n===== GITALMA from the ICR RSE Team =====")                
+        print("\n===== GITALMA from the ICR RSE Team! =====")                
         if "repo" in repo_params:        
             print(f"repo: {repo_params['repo']}")    
         elif "server" in repo_params:        
