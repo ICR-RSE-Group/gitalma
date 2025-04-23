@@ -111,8 +111,7 @@ def main():
             print(f"server: {repo_params['server']}")
         if "path" in repo_params:        
             print(f"path: {repo_params['path']}")            
-        print("Local version:", thisversion)
-        print("Latest version:", gversion)        
+        print("Local/latest versions:", thisversion, "/", gversion)        
         print("=====================================")
 
     #########################################################################################
