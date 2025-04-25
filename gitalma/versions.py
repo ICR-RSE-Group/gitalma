@@ -12,8 +12,8 @@ def auto_update():
         if gh_v != a_v:
             if not exe_gitlab:            
                 exe_gitlab = "python"
-            else:
-                exe_python = exe_gitlab.replace("gitlab","python")
+            else:                
+                exe_python = "/".join(exe_gitlab.split("/")[:-1]) + "/python"   
             print("github version: ", gh_v)
             print("Current version: ", a_v)
             print(f"{exe_python} -m pip install git+https://github.com/ICR-RSE-Group/gitalma.git")
