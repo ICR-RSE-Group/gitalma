@@ -4,17 +4,24 @@ import os
 
 
 def auto_update():        
-    gh_v = get_github_version()
-    a_v = get_gitalma_version()
-    process = subprocess.run(["which","gitlab"],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    exe_gitlab = process.stdout.decode('utf-8').strip()
-    if gh_v != a_v:        
-        exe_python = exe_gitlab.replace("gitlab","python")
-        print("github version: ", gh_v)
-        print("Current version: ", a_v)
-        print(f"{exe_python} -m pip install git+https://github.com/ICR-RSE-Group/gitalma.git")
-        os.system(f"{exe_python} -m pip install git+https://github.com/ICR-RSE-Group/gitalma.git")        
-        return True        
+    try:
+        gh_v = get_github_version()
+        a_v = get_gitalma_version()
+        process = subprocess.run(["which","gitlab"],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        exe_gitlab = process.stdout.decode('utf-8').strip()
+        if gh_v != a_v:
+            if not exe_gitlab:            
+                exe_gitlab = "python"
+            else:
+                exe_python = exe_gitlab.replace("gitlab","python")
+            print("github version: ", gh_v)
+            print("Current version: ", a_v)
+            print(f"{exe_python} -m pip install git+https://github.com/ICR-RSE-Group/gitalma.git")
+            os.system(f"{exe_python} -m pip install git+https://github.com/ICR-RSE-Group/gitalma.git")        
+            return True        
+    except Exception as e:
+        print("Upgrade error: ", Exception)
+        return False
     return False
         
 def get_github_version():
