@@ -6,25 +6,17 @@ import os
 def auto_update():        
     gh_v = get_github_version()
     a_v = get_gitalma_version()
-    if gh_v != a_v:
+    process = subprocess.run(["which","gitlab"],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    exe_gitlab = process.stdout.decode('utf-8').strip()
+    if gh_v != a_v:        
+        exe_python = exe_gitlab.replace("gitlab","python")
         print("github version: ", gh_v)
         print("Current version: ", a_v)
-        os.system("python -m pip install git+https://github.com/ICR-RSE-Group/gitalma.git")
-        #process = subprocess.run(["python","-m","pip", "install", "git+https://git.icr.ac.uk/sc-rse/group/resources/gitalma.git@main#egg=gitalma"],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        #strout = process.stdout.decode('utf-8').strip().split('\n')
-        #changed = False
-        #for line in strout:
-        #    if "Successfully installed" in line:
-        #        print(line)                
-        #        changed = True
-        #if changed:
-        #    print("Updated gitalma")
-        #    os.system("python -m pip show gitalma | grep Version")
+        print(f"{exe_python} -m pip install git+https://github.com/ICR-RSE-Group/gitalma.git")
+        os.system(f"{exe_python} -m pip install git+https://github.com/ICR-RSE-Group/gitalma.git")        
         return True        
     return False
         
-
-
 def get_github_version():
     # get the file contents of the github file
     version = ""

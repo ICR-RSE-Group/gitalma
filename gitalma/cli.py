@@ -56,7 +56,7 @@ def main():
     parser.add_argument("--dry", help="report what would be done (mkdir, clone and pull) but don't do it", action="store_true")    
     parser.add_argument("--single", help="override multithreaded behaviour, stay in single thread.", action="store_true")
     parser.add_argument("--root", help="run from home path no matter where in the repo you are.", action="store_true")
-    
+        
     args = parser.parse_args()
     thisversion = get_gitalma_version()
     gversion = get_github_version()
