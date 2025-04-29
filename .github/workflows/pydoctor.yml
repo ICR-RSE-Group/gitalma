@@ -39,7 +39,7 @@ jobs:
           --html-output=./apidocs \
           --project-name="gitalma" \
           --project-url="https://github.com/${{ github.repository }}" \
-          --project-base-dir=gitalma \
+          --project-base-dir=src/gitalma \
           gitalma
 
     - name: Deploy to GitHub Pages
