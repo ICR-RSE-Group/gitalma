@@ -4,3 +4,4 @@ gitalma.egg-info/*
 gitalma.egg-info/entry_points.txt
 gitalma.egg-info/SOURCES.txt
 gitalma.egg-info/PKG-INFO
+.coverage
