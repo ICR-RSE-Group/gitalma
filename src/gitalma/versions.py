@@ -16,8 +16,8 @@ def auto_update():
                 exe_python = "/".join(exe_gitlab.split("/")[:-1]) + "/python3"   
             print("github version: ", gh_v)
             print("Current version: ", a_v)
-            print(f"{exe_python} -m pip install git+https://github.com/ICR-RSE-Group/gitalma.git")
-            os.system(f"{exe_python} -m pip install git+https://github.com/ICR-RSE-Group/gitalma.git")        
+            print(f"{exe_python} -m pip install git+https://github.com/ICR-RSE-Group/gitalma.git --break-system-packages")
+            os.system(f"{exe_python} -m pip install git+https://github.com/ICR-RSE-Group/gitalma.git --break-system-packages")        
             return True        
     except Exception as e:
         print("Upgrade error: ", Exception)
