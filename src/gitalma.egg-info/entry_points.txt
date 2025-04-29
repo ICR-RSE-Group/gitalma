@@ -1,3 +1,0 @@
-[console_scripts]
-gitalma = gitalma.cli:main
-gitlab = gitalma.cli:main
