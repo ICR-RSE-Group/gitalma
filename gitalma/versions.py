@@ -16,11 +16,18 @@ def auto_update():
                 exe_python = "/".join(exe_gitlab.split("/")[:-1]) + "/python3"   
             print("github version: ", gh_v)
             print("Current version: ", a_v)
-            print(f"{exe_python} -m pip install git+https://github.com/ICR-RSE-Group/gitalma.git --break-system-packages")
-            os.system(f"{exe_python} -m pip install git+https://github.com/ICR-RSE-Group/gitalma.git --break-system-packages")        
+            update_cmd = f"{exe_python} -m pip install git+https://github.com/ICR-RSE-Group/gitalma.git" #--break-system-packages
+            print(update_cmd)
+            process = subprocess.run(update_cmd.split(" "), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            outstr = process.stdout.decode('utf-8').strip()
+            errstr = process.stderr.decode('utf-8').strip()
+            if outstr:
+                print("Output: ", outstr)
+            if errstr:
+                print("Error: ", errstr)
             return True        
     except Exception as e:
-        print("Upgrade error: ", Exception)
+        print("Upgrade error: ", e)
         return False
     return False
         
