@@ -19,7 +19,7 @@ pip install -e .
 You may need to re-install the package if the cli is changed.
 
 ## Making a release
-CHange the version in pyproject.toml, otherwise it won't autoupgrade for anyone with that mode
+CHange the version in pyproject.toml
 
 ## Automated documentation
 the github-action pydoctor builds the documentation from the doc strings

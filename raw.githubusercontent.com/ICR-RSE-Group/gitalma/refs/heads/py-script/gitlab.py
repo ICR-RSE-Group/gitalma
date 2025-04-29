@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """-------------------------------------
 GITLAB PULL SCRIPT FOR BCR-DataScienceTeam
 This module downloads dynamically all the projects from gitlab and clones if absent or pulls if present.
@@ -46,6 +44,7 @@ def main():
     parser.add_argument("-server", help="The url to gitlab or github", type=str)
     parser.add_argument("-subgroup", help="the gitlab subgroup number which is the root of the gitlab projects", type=int)    
     parser.add_argument("-protocol", help="override default https clone behaviour with ssh", type=str)    
+    parser.add_argument("-autoupgrade", help="Always automatically update to latest main version", type=str)
     
     # The flags        
     parser.add_argument("--debug", help="outputs extra logs for debugging", action="store_true")
@@ -110,7 +109,11 @@ def main():
         print("Local/latest versions:", thisversion, "/", gversion)        
         print("=====================================")
 
-    #########################################################################################        
+    #########################################################################################
+    if "autoupgrade" in params:
+        if params["autoupgrade"].upper() == "Y":
+            auto_update()
+    
     if args.root:
         params["path"] = params["home"]
         scrch = Scratch(params["path"])
@@ -306,6 +309,7 @@ def init_args(scrch, args):
     else:
         params["protocol"] = "https" if not args.protocol else args.protocol
     params["subgroup"] = -1 if not args.subgroup else args.subgroup    
+    params["autoupgrade"] = "Y" if not args.autoupgrade else args.autoupgrade
     return params
 ##################################################################################
 def cmd_args(args):
