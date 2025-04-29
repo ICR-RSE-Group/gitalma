@@ -13,7 +13,10 @@ def auto_update():
             if not exe_gitlab:            
                 exe_gitlab = "python3"
             else:                
-                exe_python = "/".join(exe_gitlab.split("/")[:-1]) + "/python3"   
+                exe_python = "/".join(exe_gitlab.split("/")[:-1]) + "/python3"
+                # but if it doesn;t exist tghen use default python
+                if not os.path.exists(exe_python):
+                    exe_python = "python3"
             print("github version: ", gh_v)
             print("Current version: ", a_v)
             update_cmd = f"{exe_python} -m pip install git+https://github.com/ICR-RSE-Group/gitalma.git" #--break-system-packages
