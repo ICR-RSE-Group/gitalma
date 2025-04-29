@@ -11,9 +11,9 @@ def auto_update():
         exe_gitlab = process.stdout.decode('utf-8').strip()
         if gh_v != a_v:
             if not exe_gitlab:            
-                exe_gitlab = "python"
+                exe_gitlab = "python3"
             else:                
-                exe_python = "/".join(exe_gitlab.split("/")[:-1]) + "/python"   
+                exe_python = "/".join(exe_gitlab.split("/")[:-1]) + "/python3"   
             print("github version: ", gh_v)
             print("Current version: ", a_v)
             print(f"{exe_python} -m pip install git+https://github.com/ICR-RSE-Group/gitalma.git")
@@ -41,7 +41,7 @@ def get_github_version():
 
 def get_gitalma_version():    
     version = ""    
-    process = subprocess.run(["python","-m","pip", "show","gitalma","|","grep","Version"],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process = subprocess.run(["python3","-m","pip", "show","gitalma","|","grep","Version"],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     lines = process.stdout.decode('utf-8').strip().split('\n')
     for line in lines:
         if "Version" in line:
