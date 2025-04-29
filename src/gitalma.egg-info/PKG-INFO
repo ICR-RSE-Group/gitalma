@@ -1,0 +1,10 @@
+Metadata-Version: 2.4
+Name: gitalma
+Version: 0.1.5
+Summary: A library to work with gitlab on alma
+Author-email: ICR RSE team <rachel.alcraft@icr.ac.uk>
+License-File: LICENSE
+Requires-Dist: requests
+Requires-Dist: pandas
+Requires-Dist: pyyaml
+Dynamic: license-file

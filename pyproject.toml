@@ -4,9 +4,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gitalma"
-version = "0.1.4"
+version = "0.1.7"
 description = "A library to work with gitlab on alma"
-authors = [{name = "RSE team", email = "rachel.alcraft@icr.ac.uk"}]
+authors = [{name = "ICR RSE team", email = "rachel.alcraft@icr.ac.uk"}]
 
 dependencies = [
     "requests",
@@ -14,11 +14,7 @@ dependencies = [
     "pyyaml"
 ]
 
-[tool.setuptools]
-packages = ["gitalma"]  
 
-[tool.setuptools.package-data]
-pyalma = ["*.py"]
 
 [project.scripts]
 gitalma = 'gitalma.cli:main'
