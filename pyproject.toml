@@ -14,6 +14,21 @@ dependencies = [
     "pyyaml"
 ]
 
+[project.optional-dependencies]
+dev = [
+    "black",
+    "ruff",
+    "pytest",
+    "pytest-dependency",
+    "pre-commit",
+]
+ci = [
+    "black",
+    "ruff",
+    "pytest",
+    "pytest-dependency",
+]
+
 [tool.setuptools]
  packages = ["gitalma"]  
  
