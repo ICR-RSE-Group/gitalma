@@ -17,7 +17,7 @@ The alternative installation is as the single file gitlab.py, which can be done 
 ```
 mkdir bcrbioinformatics
 cd bcrbioinformatics
-wget https://raw.githubusercontent.com/ICR-RSE-Group/gitalma/refs/heads/main/gitlab.py
+wget https://raw.githubusercontent.com/ICR-RSE-Group/gitalma/refs/heads/main/api/gitlab.py
 python3 gitlab.py init -subgroup 2879
 python3 gitlab.py update
 rm gitlab.py
@@ -27,7 +27,7 @@ python3 Utils/gitlab.py status
 ```
 mkdir bcrbioinformatics
 cd bcrbioinformatics
-wget https://raw.githubusercontent.com/ICR-RSE-Group/gitalma/refs/heads/main/gitlab
+wget https://raw.githubusercontent.com/ICR-RSE-Group/gitalma/refs/heads/main/api/gitlab
 chmod +x gitlab
 gitlab init -subgroup 2879
 gitlab update
