@@ -25,7 +25,7 @@ class Scratch:
         gitlabpath = Path(self.path).resolve()        
         gits = []
         # find all the child folders that have a .git direcrorty        
-        subfolders = [f for f in gitlabpath.iterdir() if f.is_dir()]
+        subfolders = [f for f in gitlabpath.iterdir() if f.is_dir()] + [gitlabpath]
         while len(subfolders) > 0:        
             subfolder = subfolders.pop()
             if os.path.exists(os.path.join(subfolder, ".git")):

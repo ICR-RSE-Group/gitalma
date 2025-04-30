@@ -5,7 +5,7 @@
 # The repo that this is generated from is found at:
 # https://github.com/ICR-RSE-Group/gitalma
 # Generated on: 2025-04-30
-# Version = 0.2.1
+# Version = 0.9.0
 ##########################################
 from pathlib import Path
 import argparse
@@ -823,7 +823,7 @@ class Scratch:
         gitlabpath = Path(self.path).resolve()
         gits = []
         # find all the child folders that have a .git direcrorty
-        subfolders = [f for f in gitlabpath.iterdir() if f.is_dir()]
+        subfolders = [f for f in gitlabpath.iterdir() if f.is_dir()] + [gitlabpath]
         while len(subfolders) > 0:
             subfolder = subfolders.pop()
             if os.path.exists(os.path.join(subfolder, ".git")):
@@ -855,7 +855,7 @@ class Scratch:
 
 ##########################################
 
-LVERSION  = '0.2.1'
+LVERSION  = '0.9.0'
 
 def get_github_version():
     # get the file contents of the github file
