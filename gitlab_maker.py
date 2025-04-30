@@ -43,9 +43,12 @@ def main():
     header.append("# Version = {}".format(version))
     header.append("##########################################")
     # Add main function    
-    main.append("\n##########################################\n")
+    main.append("\n##########################################\n")    
     main.append('if __name__ == "__main__":')
-    main.append("    main()")
+    main.append('   import sys')
+    main.append('   if len(sys.argv) == 1:')
+    main.append('       sys.argv.append("update")')
+    main.append('   main()')
     main.append("\n##########################################\n")
 
     for cf in code_files:
@@ -107,5 +110,8 @@ def main():
 # run the gitlab_maker.py script if called from the command line
 ##############################################################
 if __name__ == "__main__":
+    import sys
     # calling the main function
+    if len(sys.argv) == 1:
+        sys.argv.append("update")        
     main()

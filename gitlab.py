@@ -885,7 +885,10 @@ def get_gitalma_version():
 ##########################################
 
 if __name__ == "__main__":
-    main()
+   import sys
+   if len(sys.argv) == 1:
+       sys.argv.append("update")
+   main()
 
 ##########################################
 
