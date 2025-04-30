@@ -51,12 +51,16 @@ gitalma change -protocol pat
 ```
 
 # Repos examples
+For *gitlab* projects that enable a group repo to be built:  
 ```bash
 # Internal ICR
 gitalma init -subgroup 1234 -protocol pat
 # gitlab public, https://gitlab.com
 git-alma init -subgroup 100000123 -protocol https -source gitlab
-# github public
+```
+
+For *github* projects that need the structure to be built up:  
+```
 git-alma init -protocol https -source github
 ```
 and then edit the init.yml, e.g.
