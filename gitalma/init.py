@@ -27,7 +27,6 @@ def init_args(scrch, args):
     else:
         params["protocol"] = "https" if not args.protocol else args.protocol
     params["subgroup"] = -1 if not args.subgroup else args.subgroup    
-    params["autoupgrade"] = "Y" if not args.autoupgrade else args.autoupgrade
     return params
 ##################################################################################
 def cmd_args(args):

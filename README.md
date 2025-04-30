@@ -11,6 +11,20 @@ python -m pip install git+https://github.com/ICR-RSE-Group/gitalma.git
 python -m pip uninstall gitalma
 ```
 
+## Install as a single file gitlab.py
+The alternative installation is as the single file gitlab.py
+```
+mkdir bcrbioinformatics
+cd bcrbioinformatics
+wget https://raw.githubusercontent.com/ICR-RSE-Group/gitalma/refs/heads/py-script/gitlab.py
+chmod +x gitlab.py
+./gitlab.py init -subgroup 2879
+./gitlab.py update
+chmod +x Utils/gitlab.py
+export PATH="$PWD/Utils:$PATH"
+rm gitlab.py
+gitlab.py status
+```
 
 ## Quick start
 Documentation from [pydoctor is here](https://github.com/ICR-RSE-Group/gitalma)
@@ -21,8 +35,7 @@ gitalma init -subgroup 1234
 gitlab update
 gitalma status
 gitlab history
-gitalma change -protocol pat
-gitlab change -autoupgrade N 
+gitalma change -protocol pat 
 ```
 
 # Repos examples

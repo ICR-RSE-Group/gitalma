@@ -5,3 +5,4 @@ gitalma.egg-info/entry_points.txt
 gitalma.egg-info/SOURCES.txt
 gitalma.egg-info/PKG-INFO
 .coverage
+tests/__pycache__/*
