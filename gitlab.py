@@ -684,13 +684,24 @@ def gl_clone_clean(params, dry, all_projects=[]):
     count = 0
     for gpath in scrch.gits:
         if str(gpath) not in projects_paths:
-            count += 1
-            if dry:
-                print(f"Dry: would delete {gpath}")
+            # check the status of the project
+            process = subprocess.run(["git", "-C", gpath, "status"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            outstr = process.stdout.decode("utf-8").strip()
+            errstr = process.stderr.decode("utf-8").strip()
+            print(f"\t---Candidate to delete: {gpath}---")
+            if errstr != "":
+                print(f"\t!!!Error in git status for {gpath}: {errstr}")
+            elif "nothing to commit" in outstr:
+                count += 1
+                if dry:
+                    print(f"\tDry: would delete {gpath}")
+                else:
+                    print(f"\tDeleting {gpath}\*")
+                    subprocess.run(["rm", "-rf", gpath],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             else:
-                print(f"Deleting {gpath}")
-                # TODO check if there are any files that need updating
-                subprocess.run(["rm", "-rf", gpath],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                print(f"\t!!!Project {gpath} has uncommitted changes, not deleting!!!")
+
+
     if count > 0:
         print()
     print(f"\tDeleted {count} projects")
