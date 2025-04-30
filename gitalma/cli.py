@@ -83,7 +83,7 @@ def main():
     new_params = init_args(scrch, args)
     cmd_params = cmd_args(args)
     repo_params = init_check_get(scrch,new_params)
-    clone_params = clone_args(args,cmd_params)
+    clone_params = gl_clone_args(args,cmd_params)
     params = {}
     for key in cmd_params:
         params[key] = cmd_params[key]
@@ -122,8 +122,8 @@ def main():
     elif args.action[0] == "update":        
         if params["source"] in ["gitlab","icr"]:
             print(f">> Check projects to delete --- ")
-            all_projects,archived = clone_clean(params, args.dry)
-            to_clone, to_pull = clone_projects(params, args.dry, args.debug, all_projects)                
+            all_projects,archived = gl_clone_clean(params, args.dry)
+            to_clone, to_pull = gl_clone_projects(params, args.dry, args.debug, all_projects)                
         else:
             to_clone, to_pull = gh_clone_projects(params, args.dry, args.debug)
         if to_clone != []:
@@ -136,7 +136,7 @@ def main():
         print(f">> Pull projects---")
         git_pull_all(params, "pull", args.dry, args.debug,None)
     elif args.action[0] == "clean":                     
-        clone_clean(params, args.dry)
+        gl_clone_clean(params, args.dry)
     elif args.action[0] == "status":                    
         print(f">> Status projects---")
         git_pull_all(params, "status", args.dry, args.debug,None)

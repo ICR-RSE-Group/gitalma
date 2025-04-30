@@ -8,37 +8,13 @@ from .scratch import Scratch
 
 ##################################################################################      
 ### Command line parsing ###
-def clone_args(args,params):    
+def gl_clone_args(args,params):    
     params["path"] = os.getcwd() if not args.path else args.path    
     params["multi"] = False if args.single else True
     params["root"] = True if args.root else False    
     return params
 ##################################################################################
-def create_subgroups(params, dry):
-    print(f"---Creating subgroups--- ")
-    sgs = 0
-    api = GitLabAPI(params["subgroup"], params["server"])
-    full_groups = api.list_groups()
-    sctch = Scratch(params["path"])
-    groups = sctch.get_subgroups(full_groups, api.repo_len)
-    count = 0
-    for group in groups:
-        count += 1
-        if not os.path.exists(group):
-            sgs += 1
-            msg = f"{count}/{len(groups)}:"
-            msg += f"Creating {group}"
-            if dry:
-                print(f"Dry: would create group {group}")
-            else:                
-                print(msg)
-                os.makedirs(group, exist_ok=True)
-    if sgs > 0:
-        print()
-    print(f"\tCreated {sgs} subgroups")
-    print("=====================================")
-##################################################################################
-def clone_projects(params, dry,debug, all_projects=[]):
+def gl_clone_projects(params, dry,debug, all_projects=[]):
     print(f"---Gathering projects--- ")    
     api = GitLabAPI(params["subgroup"], params["server"])
     repo_len = api.repo_len    
@@ -69,7 +45,7 @@ def clone_projects(params, dry,debug, all_projects=[]):
             to_pull.append(gpath)    
     return to_clone, to_pull
 ##################################################################################
-def clone_clean(params, dry, all_projects=[]):    
+def gl_clone_clean(params, dry, all_projects=[]):    
     api = GitLabAPI(params["subgroup"], params["server"])
     repo_len = api.repo_len
     scrch = Scratch(params["path"])    
