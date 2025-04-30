@@ -5,8 +5,8 @@ import os
 
 
 def main():
-    outfiles = ["gitlab.py", "gitlab"]
-    tmpfile = "gitlab.py.tmp"
+    outfiles = ["api/gitlab.py", "api/gitlab"]
+    tmpfile = "api/gitlab.py.tmp"
 
     code_files = []
     code_files.append("gitalma/cli.py")
