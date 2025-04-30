@@ -22,6 +22,7 @@ python3 gitlab.py init -subgroup 2879
 python3 gitlab.py update
 rm gitlab.py
 python3 Utils/gitlab.py status
+python3 Utils/gitlab.py #no command defaults to update
 ```
 **Pretending it is a package**
 ```
