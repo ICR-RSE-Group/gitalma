@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - py-script
   pull_request:
     branches:
       - main
