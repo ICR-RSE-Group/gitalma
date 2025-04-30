@@ -79,6 +79,9 @@ def main():
             fw.write(line + "\n")
         # Add code
         for line in code:
+            if 'LVERSION = ""' in line:
+                # replace from = onwards
+                line = f"{line.split('=')[0]} = '{version}'"
             fw.write(line + "\n")
         # Add main function
         for line in main:

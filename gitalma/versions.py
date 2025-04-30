@@ -2,37 +2,7 @@ import requests
 import subprocess
 import os
 
-
-def auto_update():        
-    try:
-        gh_v = get_github_version()
-        a_v = get_gitalma_version()
-        process = subprocess.run(["which","gitlab"],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        exe_gitlab = process.stdout.decode('utf-8').strip()
-        if gh_v != a_v:
-            if not exe_gitlab:            
-                exe_gitlab = "python3"
-            else:                
-                exe_python = "/".join(exe_gitlab.split("/")[:-1]) + "/python3"
-                # but if it doesn;t exist tghen use default python
-                if not os.path.exists(exe_python):
-                    exe_python = "python3"
-            print("github version: ", gh_v)
-            print("Current version: ", a_v)
-            update_cmd = f"{exe_python} -m pip install git+https://github.com/ICR-RSE-Group/gitalma.git" #--break-system-packages
-            print(update_cmd)
-            process = subprocess.run(update_cmd.split(" "), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            outstr = process.stdout.decode('utf-8').strip()
-            errstr = process.stderr.decode('utf-8').strip()
-            if outstr:
-                print("Output: ", outstr)
-            if errstr:
-                print("Error: ", errstr)
-            return True        
-    except Exception as e:
-        print("Upgrade error: ", e)
-        return False
-    return False
+LVERSION = ""
         
 def get_github_version():
     # get the file contents of the github file
@@ -49,6 +19,12 @@ def get_github_version():
         print("Failed to download cli.py")
     return version
 
+def get_local_version():
+    if LVERSION == "":
+        return get_gitalma_version()
+    else:
+        return LVERSION
+    
 def get_gitalma_version():    
     version = ""    
     process = subprocess.run(["python3","-m","pip", "show","gitalma","|","grep","Version"],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
