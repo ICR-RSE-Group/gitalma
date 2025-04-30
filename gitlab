@@ -5,7 +5,7 @@
 # The repo that this is generated from is found at:
 # https://github.com/ICR-RSE-Group/gitalma
 # Generated on: 2025-04-30
-# Version = 0.2.0
+# Version = 0.2.1
 ##########################################
 from pathlib import Path
 import argparse
@@ -67,10 +67,10 @@ def main():
     parser.add_argument("--root", help="run from home path no matter where in the repo you are.", action="store_true")
 
     args = parser.parse_args()
-    thisversion = get_gitalma_version()
+    thisversion = get_local_version()
     gversion = get_github_version()
     if args.version:
-        print("GitAlma version:", thisversion)
+        print("Local version:", thisversion)
         print("Github version:", gversion)
         exit()
 
@@ -848,37 +848,7 @@ class Scratch:
 
 ##########################################
 
-
-def auto_update():
-    try:
-        gh_v = get_github_version()
-        a_v = get_gitalma_version()
-        process = subprocess.run(["which","gitlab"],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        exe_gitlab = process.stdout.decode('utf-8').strip()
-        if gh_v != a_v:
-            if not exe_gitlab:
-                exe_gitlab = "python3"
-            else:
-                exe_python = "/".join(exe_gitlab.split("/")[:-1]) + "/python3"
-                # but if it doesn;t exist tghen use default python
-                if not os.path.exists(exe_python):
-                    exe_python = "python3"
-            print("github version: ", gh_v)
-            print("Current version: ", a_v)
-            update_cmd = f"{exe_python} -m pip install git+https://github.com/ICR-RSE-Group/gitalma.git" #--break-system-packages
-            print(update_cmd)
-            process = subprocess.run(update_cmd.split(" "), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            outstr = process.stdout.decode('utf-8').strip()
-            errstr = process.stderr.decode('utf-8').strip()
-            if outstr:
-                print("Output: ", outstr)
-            if errstr:
-                print("Error: ", errstr)
-            return True
-    except Exception as e:
-        print("Upgrade error: ", e)
-        return False
-    return False
+LVERSION  = '0.2.1'
 
 def get_github_version():
     # get the file contents of the github file
@@ -894,6 +864,12 @@ def get_github_version():
     else:
         print("Failed to download cli.py")
     return version
+
+def get_local_version():
+    if LVERSION == "":
+        return get_gitalma_version()
+    else:
+        return LVERSION
 
 def get_gitalma_version():
     version = ""

@@ -57,10 +57,10 @@ def main():
     parser.add_argument("--root", help="run from home path no matter where in the repo you are.", action="store_true")
         
     args = parser.parse_args()
-    thisversion = get_gitalma_version()
+    thisversion = get_local_version()
     gversion = get_github_version()
     if args.version:        
-        print("GitAlma version:", thisversion)
+        print("Local version:", thisversion)
         print("Github version:", gversion)
         exit()
     
