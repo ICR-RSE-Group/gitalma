@@ -164,10 +164,6 @@ def main():
 
         else:
             print(f">> No change supplied, exiting")
-    elif args.action[0] == "upgrade":
-        print("auto-upgrade")
-        if not auto_update():
-            print("No update needed")
 
     #----------------------------------------------------
     end_time = datetime.datetime.now()
