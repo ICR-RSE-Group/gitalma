@@ -12,8 +12,7 @@ python -m pip uninstall gitalma
 ```
 
 ## Install as a single file gitlab.py
-The alternative installation is as the single file gitlab.py, which can be done either by installing it and using the explicit path, or by making it seem like a package.  
-**Explicit path and exactly as now**
+The alternative installation is as the single file gitlab.py, which can be done either by installing it and using the explicit path.
 ```
 mkdir bcrbioinformatics
 cd bcrbioinformatics
@@ -23,19 +22,6 @@ python3 gitlab.py update
 rm gitlab.py
 python3 Utils/gitlab.py status
 python3 Utils/gitlab.py #no command defaults to update
-```
-**Pretending it is a package**
-```
-mkdir bcrbioinformatics
-cd bcrbioinformatics
-wget https://raw.githubusercontent.com/ICR-RSE-Group/gitalma/refs/heads/main/api/gitlab
-chmod +x gitlab
-gitlab init -subgroup 2879
-gitlab update
-chmod +x Utils/gitlab
-export PATH="$PWD/Utils:$PATH"
-rm gitlab
-gitlab status
 ```
 
 ## Quick start
