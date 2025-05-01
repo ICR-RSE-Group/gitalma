@@ -5,7 +5,7 @@ import os
 
 
 def main():
-    outfiles = ["api/gitlab.py", "api/gitlab"]
+    outfiles = ["api/gitlab.py"]
     tmpfile = "api/gitlab.py.tmp"
 
     code_files = []
@@ -103,8 +103,9 @@ def main():
                 fw.write(tmpfile_content)
         else:
             print("The files are the same")
-    # remove the tmpfile    
-    os.remove(tmpfile)
+    # remove the tmpfile
+    if os.path.exists(tmpfile):
+        os.remove(tmpfile)
 
 
 # run the gitlab_maker.py script if called from the command line

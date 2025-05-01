@@ -13,6 +13,7 @@ class Scratch:
         """Find the parent gitalma home."""        
         #Check if the given path is a Git repository or its child."""
         gitlabpath = Path(self.path).resolve()
+        self.working = os.getcwd()
         
         for gitlab_path in [gitlabpath, *gitlabpath.parents]:                        
             if os.path.exists(os.path.join(gitlab_path, ".gitalma")):                
@@ -34,6 +35,10 @@ class Scratch:
                 subfolders.extend([f for f in subfolder.iterdir() if f.is_dir()])
         for g in range(len(gits)):
             gits[g] = str(gits[g])
+        # make sure this is a unique list
+        gits = list(set(gits))
+        # sort the list
+        gits.sort()
         return gits
     ##################################################################################
     def get_subgroups(self, groups, repo_len):

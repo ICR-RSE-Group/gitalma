@@ -73,13 +73,25 @@ def main():
     repo_params = init_check_get(scrch,new_params)
     #########################################################################################
     if args.action[0] == "init":        
-        changed_params = init_save(new_params, repo_params)                
+        changed_params = init_save(new_params, repo_params)
         init_print(changed_params, init=True)
         exit()
     #########################################################################################
     if not scrch.gitalma:
         print("Not in a gitalma repository")
-        exit()    
+        if scrch.working.endswith("/bcrbioinformatics"):
+            print("Initialising gitalma repository")
+            params = {"path": scrch.working,
+                      "home": scrch.working,
+                      "subgroup":2879,
+                      "source":"icr",
+                      "server":"https://git.icr.ac.uk",
+                      "protocol":"pat"}            
+            params = init_save(params, params)
+            init_print(params, init=True)
+            exit()
+        else:
+            exit()    
     new_params = init_args(scrch, args)
     cmd_params = cmd_args(args)
     repo_params = init_check_get(scrch,new_params)
@@ -103,14 +115,14 @@ def main():
             print(f"\t{key}: {clone_params[key]}")
         print("=====================================")
     else: #less verbose logging        
-        print("\n===== GITALMA from the ICR RSE Team =====")                
+        print("\n===== GITALMA from the ICR RSE Team =====")
         if "repo" in repo_params:        
             print(f"repo: {repo_params['repo']}")    
         elif "server" in repo_params:        
             print(f"server: {repo_params['server']}")
         if "path" in repo_params:        
             print(f"path: {repo_params['path']}")            
-        print("Local/latest versions:", thisversion, "/", gversion)        
+        print("Local/latest versions:", thisversion, "/", gversion)
         print("=====================================")
 
     #########################################################################################    

@@ -72,7 +72,7 @@ def gl_clone_clean(params, dry, all_projects=[]):
                 if dry:
                     print(f"\tDry: would delete {gpath}")
                 else:
-                    print(f"\tDeleting {gpath}\*")
+                    print(f"\tDeleting {gpath}/*")
                     subprocess.run(["rm", "-rf", gpath],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             else:
                 print(f"\t!!!Project {gpath} has uncommitted changes, not deleting!!!")
