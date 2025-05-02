@@ -48,6 +48,8 @@ def main():
     main.append('   import sys')
     main.append('   if len(sys.argv) == 1:')
     main.append('       sys.argv.append("update")')
+    main.append('   elif sys.argv[1] == "--status":')
+    main.append('       sys.argv[1] = "status"')
     main.append('   main()')
     main.append("\n##########################################\n")
 

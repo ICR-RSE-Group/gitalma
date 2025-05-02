@@ -163,6 +163,7 @@ def main():
                 api = GitLabAPI(params["subgroup"], params["server"])
                 token = api.token
             git_change_protocol(params, args.protocol, args.dry, args.debug,token)
+            changed_params = init_save(params, params)
             
         else:
             print(f">> No change supplied, exiting")                                        
