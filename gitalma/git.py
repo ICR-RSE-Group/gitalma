@@ -187,7 +187,8 @@ def git_message(process, msg, debug, force_msg=False):
     return connection_error
 ##################################################################################
 def git_change_protocol(params, new_protocol, dry, debug,token):
-    scrch = Scratch(params["path"])            
+    scrch = Scratch(params["path"])  
+    server = params["server"]          
     to_change = scrch.gits        
     count = 0
     for ch in to_change:        
@@ -229,9 +230,11 @@ def git_change_protocol(params, new_protocol, dry, debug,token):
                             would_change = True
                     if would_change:
                         count += 1
+                        line = line.replace(f"{server.replace('https://','')}:",
+                                            f"{server.replace('https://','')}/")
                         if dry:
-                            print("would replace:", line)
-                        elif debug:
+                            print("would replace:", line)                        
+                        elif debug:                            
                             print("replacing:", line)
                                                     
                 new_lines.append(line)
