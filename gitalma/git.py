@@ -154,7 +154,9 @@ def git_message(process, msg, debug, force_msg=False):
     err = err.replace("implicit or explicit expectation of privacy. Please contact ICR","") 
     err = err.replace("Information Security (infosec@icr.ac.uk) for more information.","")                    
     #err = err.replace(" ","")
-    err = err.replace("\n","")
+    err = err.replace("\n","")    
+    if err.upper() == err.lower():
+        err = ""
     #err = err.replace("\t","")
     if "Connection reset by peer" in err and not force_msg:
         connection_error = True        
@@ -167,7 +169,9 @@ def git_message(process, msg, debug, force_msg=False):
         out = out.replace("On branch main","")
         out = out.replace("Your branch is up to date with 'origin/main'.","")
         out = out.replace("nothing to commit, working tree clean","")
-        out = out.strip()                                                
+        out = out.strip()
+        if out.upper() == out.lower():
+            out = ""
         outs = out.split("\n")
         out2 = "\n\t".join(outs).strip()    
         errs = err.split("\n") 
