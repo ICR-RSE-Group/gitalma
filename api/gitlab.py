@@ -5,7 +5,7 @@
 # The repo that this is generated from is found at:
 # https://github.com/ICR-RSE-Group/gitalma
 # Generated on: 2025-05-29
-# Version = 1.0.7
+# Version = 1.0.8
 ##########################################
 from pathlib import Path
 import argparse
@@ -651,13 +651,14 @@ def gh_clone_projects(params, dry,debug, all_projects=[]):
         ppath = project[2]
         gpath = f"{home_path}/{'/'.join(ppath.split('/')[repo_len:])}"
         spath = f"{home_path}/{'/'.join(ppath.split('/')[repo_len:-1])}"
-        if params["protocol"] == "ssh":
-            phttps = phttps.replace("https://","git@")
-        if not os.path.exists(gpath):
-            os.makedirs(spath, exist_ok=True)
-            to_clone.append((phttps, gpath))
-        else:
-            to_pull.append(gpath)
+        if root_path in gpath:
+            if params["protocol"] == "ssh":
+                phttps = phttps.replace("https://","git@")
+            if not os.path.exists(gpath):
+                os.makedirs(spath, exist_ok=True)
+                to_clone.append((phttps, gpath))
+            else:
+                to_pull.append(gpath)
     return to_clone, to_pull
 ##################################################################################
 ##########################################
@@ -693,15 +694,16 @@ def gl_clone_projects(params, dry,debug, all_projects=[]):
         ppath = project[2]
         spath = f"{home_path}/{'/'.join(ppath.split('/')[repo_len:-1])}"
         gpath = f"{home_path}/{'/'.join(ppath.split('/')[repo_len:])}"
-        if params["protocol"] == "ssh":
-            phttps = phttps.replace("https://git.icr.ac.uk/","git@git.icr.ac.uk:")
-        elif params["protocol"] == "pat":
-            phttps = api.tokenise_server(phttps)
-        if not os.path.exists(gpath):
-            os.makedirs(spath, exist_ok=True)
-            to_clone.append((phttps, gpath))
-        else:
-            to_pull.append(gpath)
+        if root_path in gpath:
+            if params["protocol"] == "ssh":
+                phttps = phttps.replace("https://git.icr.ac.uk/","git@git.icr.ac.uk:")
+            elif params["protocol"] == "pat":
+                phttps = api.tokenise_server(phttps)
+            if not os.path.exists(gpath):
+                os.makedirs(spath, exist_ok=True)
+                to_clone.append((phttps, gpath))
+            else:
+                to_pull.append(gpath)
     return to_clone, to_pull
 ##################################################################################
 def gl_clone_clean(params, dry, all_projects=[]):
@@ -900,7 +902,7 @@ class Scratch:
 
 ##########################################
 
-LVERSION  = '1.0.7'
+LVERSION  = '1.0.8'
 
 def get_github_version():
     # get the file contents of the github file
