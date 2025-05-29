@@ -36,12 +36,13 @@ def gh_clone_projects(params, dry,debug, all_projects=[]):
         ppath = project[2]        
         gpath = f"{home_path}/{'/'.join(ppath.split('/')[repo_len:])}"         
         spath = f"{home_path}/{'/'.join(ppath.split('/')[repo_len:-1])}"                       
-        if params["protocol"] == "ssh":            
-            phttps = phttps.replace("https://","git@")           
-        if not os.path.exists(gpath):                  
-            os.makedirs(spath, exist_ok=True)              
-            to_clone.append((phttps, gpath))            
-        else:            
-            to_pull.append(gpath)                
+        if root_path in gpath:
+            if params["protocol"] == "ssh":            
+                phttps = phttps.replace("https://","git@")           
+            if not os.path.exists(gpath):                  
+                os.makedirs(spath, exist_ok=True)              
+                to_clone.append((phttps, gpath))            
+            else:            
+                to_pull.append(gpath)                
     return to_clone, to_pull
 ##################################################################################
