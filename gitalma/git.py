@@ -3,14 +3,15 @@
 
 import subprocess
 import os
+import sys
 import time
 from pathlib import Path
 from .scratch import Scratch
 import threading
 
 
-THROTTLE_CLONE = 0.05
-THROTTLE_PULL = 0.01
+THROTTLE_STATUS = 0.01
+THROTTLE_PULL = 0.05
 KEEPS = 10
 
 
@@ -32,14 +33,16 @@ def git_pull_all(params, action, dry,debug, to_pull):
             if dry:
                 print(f"Dry: would {action} {gpath}")
             else:
-                if params["multi"]:
-                    time.sleep(THROTTLE_PULL)                    
+                if params["multi"]:                    
                     x = None
                     if action == "pull":
+                        time.sleep(THROTTLE_PULL)
                         x = threading.Thread(target=git_pull, args=(gpath, msg,debug))
                     elif action == "status":
+                        time.sleep(THROTTLE_STATUS)
                         x = threading.Thread(target=git_status, args=(gpath, msg,debug))
                     elif action == "history":
+                        time.sleep(THROTTLE_STATUS)
                         x = threading.Thread(target=git_history, args=(gpath, msg,debug))
                     if x != None:
                         threads_to_pull.append(x)
@@ -142,6 +145,19 @@ def git_message(process, msg, debug, force_msg=False):
     out = process.stdout.decode("utf-8").strip()    
     err = process.stderr.decode("utf-8").strip()
 
+    if "Resource temporarily unavailable" in err:
+        print("\n\nAre you accidentally running on the login node?")
+        print("\tThere are not enough resources, you can turn of multithreading with --single")        
+        raise SystemExit
+    if "thread failed to start" in err:
+        print("\n\nAre you accidentally running on the login node?")
+        print("\tThere are not enough resources, you can turn of multithreading with --single")        
+        raise SystemExit
+    if "can't start new thread" in err:
+        print("\n\nAre you accidentally running on the login node?")
+        print("\tThere are not enough resources, you can turn of multithreading with --single")        
+        raise SystemExit
+        
     # strip out err msg from ssh key
     err = err.replace('\\220',"").replace('\\230',"").replace('\\342',"").replace('\\225',"")
     err = err.replace('\\224',"").replace('\\202',"").replace('\\233',"").replace('\\222',"")
@@ -213,7 +229,7 @@ def git_change_protocol(params, new_protocol, dry, debug,token):
                             line = pat_to_https(line)
                             would_change = True
                         elif new_protocol == "ssh":
-                            line = pat_to_ssh(line)
+                            line = pat_to_ssh(line, server)
                             would_change = True
                         elif new_protocol == "pat":
                             line = pat_to_pat(line,token)
@@ -223,19 +239,17 @@ def git_change_protocol(params, new_protocol, dry, debug,token):
                             line = https_to_pat(line,token)
                             would_change = True
                         elif new_protocol == "ssh":
-                            line = https_to_ssh(line)
+                            line = https_to_ssh(line, server)
                             would_change = True                        
                     elif "git@" in line:
                         if new_protocol == "pat":
                             line = ssh_to_pat(line,token)
                             would_change = True
                         elif new_protocol == "https":
-                            line = ssh_to_https(line)                                                                
+                            line = ssh_to_https(line, server)                                                                
                             would_change = True
                     if would_change:
-                        count += 1
-                        line = line.replace(f"{server.replace('https://','')}:",
-                                            f"{server.replace('https://','')}/")
+                        count += 1                        
                         if dry:
                             print("would replace:", line)                        
                         elif debug:                            
@@ -259,18 +273,23 @@ def https_to_pat(line,token):
     line = line.replace("https://",f"https://oauth2:{token}@")
     return line
 ##################################################################################
-def https_to_ssh(line):
-    line = line.replace("https://","git@")    
+def https_to_ssh(line, server):
+    server_trunk = server.replace("https://","")    
+    line = line.replace(f"https://{server_trunk}/",f"git@{server_trunk}:")    
+    line = line.replace(f"git@{server_trunk}/", f"git@{server_trunk}:")    
     return line
 ##################################################################################
-def ssh_to_https(line):
-    line = line.replace("git@","https://")
+def ssh_to_https(line, server):
+    server_trunk = server.replace("https://","")
+    line = line.replace(f"git@{server_trunk}:", f"https://{server_trunk}/")    
     return line
 ##################################################################################
-def pat_to_ssh(line):
+def pat_to_ssh(line, server):
+    server_trunk = server.replace("https://","")
     lineA = line.split("https://")[0]
     lineB = line.split("@")[1]    
     line = lineA + "git@" + lineB    
+    line = line.replace(f"git@{server_trunk}/", f"git@{server_trunk}:")        
     return line
 ##################################################################################
 def pat_to_https(line):
