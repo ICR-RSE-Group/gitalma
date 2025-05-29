@@ -35,7 +35,7 @@ def gl_clone_projects(params, dry,debug, all_projects=[]):
         spath = f"{home_path}/{'/'.join(ppath.split('/')[repo_len:-1])}"               
         gpath = f"{home_path}/{'/'.join(ppath.split('/')[repo_len:])}"       
         if params["protocol"] == "ssh":            
-            phttps = phttps.replace("https://","git@")   
+            phttps = phttps.replace("https://git.icr.ac.uk/","git@git.icr.ac.uk:")   
         elif params["protocol"] == "pat":
             phttps = api.tokenise_server(phttps)        
         if not os.path.exists(gpath):                  
