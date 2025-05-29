@@ -790,9 +790,9 @@ def init_check_get(scrch,params):
     return init_params
 ##################################################################################
 def init_save(new_params, orig_params):
-    init_path = f"{new_params['path']}/.gitalma"
+    init_path = f"{new_params['home']}/.gitalma"
     os.makedirs(init_path, exist_ok=True)
-    init_file = f"{new_params['path']}/.gitalma/init.yaml"
+    init_file = f"{new_params['home']}/.gitalma/init.yaml"
     changed_params = {}
     # put orig params in first then any overwrites
     for key in orig_params:
