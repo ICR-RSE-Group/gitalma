@@ -16,7 +16,7 @@ def gl_clone_args(args,params):
 ##################################################################################
 def gl_clone_projects(params, dry,debug, all_projects=[]):
     print(f"---Gathering projects--- ")    
-    api = GitLabAPI(params["subgroup"], params["server"])
+    api = GitLabAPI(params["subgroup"], params["server"], params["wikis"])
     repo_len = api.repo_len    
     if all_projects == []:
         all_projects,archived = api.list_projects()    
@@ -38,16 +38,27 @@ def gl_clone_projects(params, dry,debug, all_projects=[]):
             if params["protocol"] == "ssh":            
                 phttps = phttps.replace("https://git.icr.ac.uk/","git@git.icr.ac.uk:")   
             elif params["protocol"] == "pat":
-                phttps = api.tokenise_server(phttps)        
+                phttps = api.tokenise_server(phttps)                    
             if not os.path.exists(gpath):                  
                 os.makedirs(spath, exist_ok=True)
                 to_clone.append((phttps, gpath))
             else:            
                 to_pull.append(gpath)    
+            #if params["wikis"]:
+            ##    # also looking for wikis                
+            #    gpath_wiki = f"{gpath}.wiki"
+            #    wiki_url = phttps.replace(".git", ".wiki.git")
+            #    if not os.path.exists(gpath_wiki):
+            #        os.makedirs(gpath_wiki, exist_ok=True)
+            #        print("Add wiki to clone", gpath_wiki, "from", phttps + ".wiki")
+            #        to_clone.append((wiki_url, gpath_wiki))
+            #    #else:
+            #        #print("Add wiki to pull", gpath_wiki)
+            #        #to_pull.append(gpath_wiki)
     return to_clone, to_pull
 ##################################################################################
 def gl_clone_clean(params, dry, all_projects=[]):    
-    api = GitLabAPI(params["subgroup"], params["server"])
+    api = GitLabAPI(params["subgroup"], params["server"], params["wikis"])
     repo_len = api.repo_len
     scrch = Scratch(params["path"])    
     if all_projects == []:

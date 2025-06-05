@@ -49,6 +49,7 @@ def main():
     parser.add_argument("-server", help="The url to gitlab or github", type=str)
     parser.add_argument("-subgroup", help="the gitlab subgroup number which is the root of the gitlab projects", type=int)    
     parser.add_argument("-protocol", help="override default https clone behaviour with ssh", type=str)    
+    parser.add_argument("-wikis", help="Whether to look for wikis too", type=bool)
         
     # The flags        
     parser.add_argument("--debug", help="outputs extra logs for debugging", action="store_true")
@@ -160,7 +161,7 @@ def main():
             print(f">> Changing to {args.protocol}")
             token = None
             if args.protocol == "pat":
-                api = GitLabAPI(params["subgroup"], params["server"])
+                api = GitLabAPI(params["subgroup"], params["server"], params["wikis"])
                 token = api.token
             git_change_protocol(params, args.protocol, args.dry, args.debug,token)
             changed_params = init_save(params, params)
