@@ -115,6 +115,8 @@ def main():
         params[key] = repo_params[key]
     for key in clone_params:
         params[key] = clone_params[key]
+    if "wikis" not in params:
+        params["wikis"] = False
     if args.debug:
         print("===========================================")
         print("===== GIT-ALMA from the ICR RSE Team =====")
