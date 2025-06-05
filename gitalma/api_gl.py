@@ -96,8 +96,8 @@ class GitLabAPI:
                         wiki_url = url.replace(".git", ".wiki.git")
                         wiki_projects.append((wiki_url, proj_id, gpath_wiki))
                                             
-            for wp in wiki_projects:                
-                projects.append(wp)
+                for wp in wiki_projects:                
+                    projects.append(wp)
             return projects, arch_projects
         except Exception as e:
             print("!!! Failed to fetch projects: ",e)
