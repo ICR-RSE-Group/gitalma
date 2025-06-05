@@ -60,7 +60,7 @@ def init_save(new_params, orig_params):
         changed_params[key] = str(new_params[key])
     # now do a sanity check on the matching names of the path and groupip
     if changed_params["source"] in ["gitlab","icr"]:
-        api = GitLabAPI(changed_params["subgroup"],changed_params["server"]), changed_params["wikis"]
+        api = GitLabAPI(changed_params["subgroup"],changed_params["server"], changed_params["wikis"])
         gp, rp = api.get_id_repo()
         changed_params["subgroup"] = gp
         changed_params["repo"] = rp
