@@ -5,7 +5,7 @@
 # The repo that this is generated from is found at:
 # https://github.com/ICR-RSE-Group/gitalma
 # Generated on: 2025-06-05
-# Version = 1.0.8
+# Version = 1.0.9
 ##########################################
 from pathlib import Path
 import argparse
@@ -844,7 +844,7 @@ def init_save(new_params, orig_params):
         changed_params[key] = str(new_params[key])
     # now do a sanity check on the matching names of the path and groupip
     if changed_params["source"] in ["gitlab","icr"]:
-        api = GitLabAPI(changed_params["subgroup"],changed_params["server"]), changed_params["wikis"]
+        api = GitLabAPI(changed_params["subgroup"],changed_params["server"], changed_params["wikis"])
         gp, rp = api.get_id_repo()
         changed_params["subgroup"] = gp
         changed_params["repo"] = rp
@@ -942,7 +942,7 @@ class Scratch:
 
 ##########################################
 
-LVERSION  = '1.0.8'
+LVERSION  = '1.0.9'
 
 def get_github_version():
     # get the file contents of the github file
