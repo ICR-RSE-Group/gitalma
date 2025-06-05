@@ -57,7 +57,10 @@ def init_save(new_params, orig_params):
         if key in changed_params:
             if orig_params[key] != new_params[key]:
                 print(f"Changing {key} from {orig_params[key]} to {new_params[key]}")
-        changed_params[key] = new_params[key]
+        if key == "home":
+            changed_params[key] = str(new_params[key])
+        else:
+            changed_params[key] = new_params[key]
     # now do a sanity check on the matching names of the path and groupip
     if changed_params["source"] in ["gitlab","icr"]:
         api = GitLabAPI(changed_params["subgroup"],changed_params["server"], changed_params["wikis"])
