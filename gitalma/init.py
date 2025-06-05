@@ -14,6 +14,7 @@ def init_args(scrch, args):
         scrch.home = str(params["path"])
     params["home"] = scrch.home    
     params["source"] = "icr" if not args.source else args.source
+    params["wikis"] = False if not args.wikis else args.wikis
     if params["source"] == "icr":        
         params["server"] = "https://git.icr.ac.uk" if not args.server else args.server    
     elif params["source"] == "gitlab":
@@ -59,7 +60,7 @@ def init_save(new_params, orig_params):
         changed_params[key] = str(new_params[key])
     # now do a sanity check on the matching names of the path and groupip
     if changed_params["source"] in ["gitlab","icr"]:
-        api = GitLabAPI(changed_params["subgroup"],changed_params["server"])
+        api = GitLabAPI(changed_params["subgroup"],changed_params["server"]), changed_params["wikis"]
         gp, rp = api.get_id_repo()
         changed_params["subgroup"] = gp
         changed_params["repo"] = rp

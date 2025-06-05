@@ -3,11 +3,12 @@ from pathlib import Path
 import requests
 
 class GitLabAPI:
-    def __init__(self, group_id, server):
+    def __init__(self, group_id, server, iswikis):
         self.repo = ""
         self.group_id = int(group_id)
         self.repo_len = 0
         self.url = server
+        self.iswikis = iswikis
         home = str(Path.home())
     
         if "icr.ac.uk" in server:
@@ -44,33 +45,59 @@ class GitLabAPI:
         """List all projects in the GitLab instance."""        
         projects = []
         arch_projects = []        
+        urls = [f"{self.url}/api/v4/groups/{self.group_id}/projects"]        
+        #if self.iswikis:
+        #    urls.append(f"{self.url}/api/v4/groups/{self.group_id}/wikis")
         try:        
-            gitlab_url = f"{self.url}/api/v4/groups/{self.group_id}/projects"            
-            page_int = 0            
-            got_pages = True
-            print("Fetching projects for", gitlab_url, end=" ", flush=True)
-            while got_pages:                
-                got_pages = False
-                page_int += 1
-                print("...", end="", flush=True)
-                response = requests.get(gitlab_url, headers=self.headers, data={"per_page":100,"page": page_int, "include_subgroups" : True})                
-                response.raise_for_status()
-                current_path = ""
-                if response.status_code == 200:
-                    if len(response.json()) == 0:
-                        print("")
-                    for val in response.json():                                                
-                        proj_id = val["id"]
-                        http_url_to_repo = val["http_url_to_repo"]
-                        path_with_namespace = val["path_with_namespace"]
-                        archived = val["archived"]                        
-                        if archived:                                                        
-                            arch_projects.append((http_url_to_repo, proj_id,path_with_namespace))
-                        else:                            
-                            projects.append((http_url_to_repo, proj_id,path_with_namespace))
-                        got_pages = True                
-                else:
-                    print("Failed to fetch projects: ",response.status_code)                                    
+            for gitlab_url in urls:            
+                page_int = 0            
+                got_pages = True
+                print("Fetching projects for", gitlab_url, end=" ", flush=True)
+                while got_pages:                
+                    got_pages = False
+                    page_int += 1
+                    print("...", end="", flush=True)
+                    response = requests.get(gitlab_url, headers=self.headers, data={"per_page":100,"page": page_int, "include_subgroups" : True})                
+                    response.raise_for_status()
+                    current_path = ""
+                    if response.status_code == 200:
+                        if len(response.json()) == 0:
+                            print("")
+                        for val in response.json():                                                
+                            proj_id = val["id"]
+                            http_url_to_repo = val["http_url_to_repo"]
+                            path_with_namespace = val["path_with_namespace"]
+                            archived = val["archived"]                        
+                            if archived:                                                        
+                                arch_projects.append((http_url_to_repo, proj_id,path_with_namespace))
+                            else:                            
+                                projects.append((http_url_to_repo, proj_id,path_with_namespace))
+                            got_pages = True                
+                    else:
+                        print("Failed to fetch projects: ",response.status_code)                                    
+            
+            # Try adding wikis if requested
+            if self.iswikis:
+                print("Fetching wikis for", gitlab_url, flush=True)
+                wiki_projects = []
+                for project in projects:
+                    url = project[0]
+                    proj_id = project[1]
+                    ppath = project[2]
+                    gitlab_url = f"{self.url}/api/v4/projects/{proj_id}/wikis"
+                    pages = 0
+                    response = requests.get(gitlab_url, headers=self.headers, data={"per_page":100,"page": 1})
+                    if response.status_code == 200:                                                
+                        for val in response.json():
+                            pages += 1
+                    if pages > 0:                            
+                        print("wiki for project ID:", proj_id, project[2])                        
+                        gpath_wiki = f"{ppath}.wiki"
+                        wiki_url = url.replace(".git", ".wiki.git")
+                        wiki_projects.append((wiki_url, proj_id, gpath_wiki))
+                                            
+            for wp in wiki_projects:                
+                projects.append(wp)
             return projects, arch_projects
         except Exception as e:
             print("!!! Failed to fetch projects: ",e)
