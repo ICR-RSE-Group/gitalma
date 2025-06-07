@@ -15,8 +15,8 @@ def gl_clone_args(args,params):
     return params
 ##################################################################################
 def gl_clone_projects(params, dry,debug, all_projects=[]):
-    print(f"---Gathering projects--- ")    
-    api = GitLabAPI(params["subgroup"], params["server"], params["wikis"])
+    print(f"---Gathering projects--- ")        
+    api = GitLabAPI(params["subgroup"], params["server"], params["wikis"], False)
     repo_len = api.repo_len    
     if all_projects == []:
         all_projects,archived = api.list_projects()    
@@ -57,8 +57,8 @@ def gl_clone_projects(params, dry,debug, all_projects=[]):
             #        #to_pull.append(gpath_wiki)
     return to_clone, to_pull
 ##################################################################################
-def gl_clone_clean(params, dry, all_projects=[]):    
-    api = GitLabAPI(params["subgroup"], params["server"], params["wikis"])
+def gl_clone_clean(params, dry, all_projects=[]):        
+    api = GitLabAPI(params["subgroup"], params["server"], params["wikis"],False)
     repo_len = api.repo_len
     scrch = Scratch(params["path"])    
     if all_projects == []:
@@ -73,21 +73,27 @@ def gl_clone_clean(params, dry, all_projects=[]):
     for gpath in scrch.gits:
         if str(gpath) not in projects_paths:                        
             # check the status of the project
-            process = subprocess.run(["git", "-C", gpath, "status"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            outstr = process.stdout.decode("utf-8").strip()
-            errstr = process.stderr.decode("utf-8").strip()
-            print(f"\t---Candidate to delete: {gpath}---")
-            if errstr != "":
-                print(f"\t!!!Error in git status for {gpath}: {errstr}")                
-            elif "nothing to commit" in outstr:
-                count += 1                
-                if dry:
-                    print(f"\tDry: would delete {gpath}")
-                else:
-                    print(f"\tDeleting {gpath}/*")
-                    subprocess.run(["rm", "-rf", gpath],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            print(f"\t~ Candidate to delete: {gpath} from {scrch.path}")
+            # check if there are child git projects
+            child_gits = scrch.get_gits(gpath)
+            if len(child_gits) > 1:
+                print(f"\t\t!!! Skipping {gpath}, is there an error in your configuration? This git folder has child gits.")
             else:
-                print(f"\t!!!Project {gpath} has uncommitted changes, not deleting!!!")
+                process = subprocess.run(["git", "-C", gpath, "status"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                outstr = process.stdout.decode("utf-8").strip()
+                errstr = process.stderr.decode("utf-8").strip()
+                
+                if errstr != "":
+                    print(f"\t\t!!! Error in git status for {gpath}: {errstr}, not deleting")                
+                elif "nothing to commit" in outstr:
+                    count += 1                
+                    if dry:
+                        print(f"\t\t~ dry: would delete {gpath}")
+                    else:
+                        print(f"\t~ deleting {gpath}/*")
+                        subprocess.run(["rm", "-rf", gpath],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                else:
+                    print(f"\t!!! Project {gpath} has uncommitted changes, not deleting!!!")
 
             
     if count > 0:

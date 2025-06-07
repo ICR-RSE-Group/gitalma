@@ -206,7 +206,7 @@ def git_message(process, msg, debug, force_msg=False):
             print("\n",msg, end="", flush=True)
     return connection_error
 ##################################################################################
-def git_change_protocol(params, new_protocol, dry, debug,token):
+def git_change_protocol(params, new_protocol, dry, debug,token, minimal=False):
     scrch = Scratch(params["path"])  
     server = params["server"]          
     to_change = scrch.gits        
@@ -226,34 +226,34 @@ def git_change_protocol(params, new_protocol, dry, debug,token):
                     would_change = False
                     if "oauth2" in line:
                         if new_protocol == "https":
-                            line = pat_to_https(line)
-                            would_change = True
+                            old,line = pat_to_https(line)
+                            would_change = old != line
                         elif new_protocol == "ssh":
-                            line = pat_to_ssh(line, server)
-                            would_change = True
+                            old,line = pat_to_ssh(line, server)
+                            would_change = old != line
                         elif new_protocol == "pat":
-                            line = pat_to_pat(line,token)
-                            would_change = True
+                            old,line = pat_to_pat(line,token)
+                            would_change = old != line
                     elif "https://" in line:
                         if new_protocol == "pat":                            
-                            line = https_to_pat(line,token)
-                            would_change = True
+                            old,line = https_to_pat(line,token)
+                            would_change = old != line
                         elif new_protocol == "ssh":
-                            line = https_to_ssh(line, server)
-                            would_change = True                        
+                            old,line = https_to_ssh(line, server)
+                            would_change = old != line                        
                     elif "git@" in line:
                         if new_protocol == "pat":
-                            line = ssh_to_pat(line,token)
-                            would_change = True
+                            old,line = ssh_to_pat(line,token)
+                            would_change = old != line
                         elif new_protocol == "https":
-                            line = ssh_to_https(line, server)                                                                
-                            would_change = True
+                            old,line = ssh_to_https(line, server)                                                                
+                            would_change = old != line
                     if would_change:
                         count += 1                        
                         if dry:
                             print("would replace:", line)                        
-                        elif debug:                            
-                            print("replacing:", line)
+                        else:                            
+                            print("replacing:", line.strip())
                                                     
                 new_lines.append(line)
                     
@@ -262,45 +262,53 @@ def git_change_protocol(params, new_protocol, dry, debug,token):
                     for line in new_lines:                                                                        
                         f.write(line)                                                                            
     
-    print(f"\nchanged {count} repo protocols")
+    if count > 0:
+        print(f"changed {count} repo protocols")
     return True
 ##################################################################################
 def ssh_to_pat(line, token):
+    old = line
     line = line.replace("git@",f"https://oauth2:{token}@")
-    return line
+    return old,line
 ##################################################################################
 def https_to_pat(line,token):
+    old = line
     line = line.replace("https://",f"https://oauth2:{token}@")
-    return line
+    return old,line
 ##################################################################################
 def https_to_ssh(line, server):
+    old = line
     server_trunk = server.replace("https://","")    
     line = line.replace(f"https://{server_trunk}/",f"git@{server_trunk}:")    
     line = line.replace(f"git@{server_trunk}/", f"git@{server_trunk}:")    
-    return line
+    return old,line
 ##################################################################################
 def ssh_to_https(line, server):
+    old = line
     server_trunk = server.replace("https://","")
     line = line.replace(f"git@{server_trunk}:", f"https://{server_trunk}/")    
-    return line
+    return old,line
 ##################################################################################
 def pat_to_ssh(line, server):
+    old = line
     server_trunk = server.replace("https://","")
     lineA = line.split("https://")[0]
     lineB = line.split("@")[1]    
     line = lineA + "git@" + lineB    
     line = line.replace(f"git@{server_trunk}/", f"git@{server_trunk}:")        
-    return line
+    return old,line
 ##################################################################################
 def pat_to_https(line):
+    old = line
     lineA = line.split("https://")[0]
     lineB = line.split("@")[1]    
     line = lineA + "https://" + lineB    
-    return line
+    return old,line
 ##################################################################################
 def pat_to_pat(line,token):    
+    old = line
     lineA = line.split("https://")[0]
     lineB = line.split("@")[1]            
     line =  lineA + f"https://oauth2:{token}@" + lineB
-    return line
+    return old,line
 ##################################################################################

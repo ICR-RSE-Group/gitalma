@@ -3,7 +3,7 @@ from pathlib import Path
 import requests
 
 class GitLabAPI:
-    def __init__(self, group_id, server, iswikis):
+    def __init__(self, group_id, server, iswikis, minimal):
         self.repo = ""
         self.group_id = int(group_id)
         self.repo_len = 0
@@ -32,7 +32,7 @@ class GitLabAPI:
             self.repo = ""
             self.repo_len = 0
             if int(group_id) != -1:
-                self.repo = self.get_repo_from_id(group_id)
+                self.repo = self.get_repo_from_id(group_id, minimal)
                 if self.repo == None:
                     print("Group ID not found")
                     exit()
@@ -91,7 +91,7 @@ class GitLabAPI:
                         for val in response.json():
                             pages += 1
                     if pages > 0:                            
-                        print("wiki for project ID:", proj_id, project[2])                        
+                        #print("wiki for project ID:", proj_id, project[2])                        
                         gpath_wiki = f"{ppath}.wiki"
                         wiki_url = url.replace(".git", ".wiki.git")
                         wiki_projects.append((wiki_url, proj_id, gpath_wiki))
@@ -106,11 +106,12 @@ class GitLabAPI:
             print("!!! Not safe to continue, exiting !!!")            
             exit()
     ##################################################################################        
-    def get_repo_from_id(self, group_id):
+    def get_repo_from_id(self, group_id, minimal):
         gitlab_url = f"{self.url}/api/v4/groups/{group_id}"        
         response = requests.get(gitlab_url, headers=self.headers, data={"include_subgroups" : False, "with_projects" : False})
         if response.status_code == 200:
-            print("Group ID:",group_id,"is",response.json()["full_path"])    
+            if not minimal:
+                print("Group ID:",group_id,"is",response.json()["full_path"])    
             return response.json()["full_path"]
         else:
             return None

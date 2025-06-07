@@ -45,7 +45,7 @@ def init_check_get(scrch,params):
             init_params = yaml.safe_load(yaml_file)#, Loader=yaml.FullLoader)                                
     return init_params
 ##################################################################################
-def init_save(new_params, orig_params):
+def init_save(new_params, orig_params, minimal, api):
     init_path = f"{new_params['home']}/.gitalma"
     os.makedirs(init_path, exist_ok=True)
     init_file = f"{new_params['home']}/.gitalma/init.yaml"
@@ -62,8 +62,7 @@ def init_save(new_params, orig_params):
         else:
             changed_params[key] = new_params[key]
     # now do a sanity check on the matching names of the path and groupip
-    if changed_params["source"] in ["gitlab","icr"]:
-        api = GitLabAPI(changed_params["subgroup"],changed_params["server"], changed_params["wikis"])
+    if changed_params["source"] in ["gitlab","icr"]:                
         gp, rp = api.get_id_repo()
         changed_params["subgroup"] = gp
         changed_params["repo"] = rp

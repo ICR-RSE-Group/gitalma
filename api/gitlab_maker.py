@@ -53,7 +53,7 @@ def main():
     main.append('    tmp_sys_arg = []')
     main.append('    for arg in sys.argv:')
     main.append('        tmp_sys_arg.append(arg)')
-    main.append('    sys.argv = sys.argv[:1] + ["change", "-protocol","pat"]')
+    main.append('    sys.argv = sys.argv[:1] + ["change", "-protocol","pat", "--minimal"]')
     main.append('    main()')
     main.append('    sys.argv = tmp_sys_arg')
     main.append('    # --------------------------------------------')            
