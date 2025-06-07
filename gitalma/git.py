@@ -243,7 +243,7 @@ def git_change_protocol(params, new_protocol, dry, debug,token, minimal=False):
                             would_change = old != line                        
                     elif "git@" in line:
                         if new_protocol == "pat":
-                            old,line = ssh_to_pat(line,token)
+                            old,line = ssh_to_pat(line,server, token)
                             would_change = old != line
                         elif new_protocol == "https":
                             old,line = ssh_to_https(line, server)                                                                
@@ -266,9 +266,10 @@ def git_change_protocol(params, new_protocol, dry, debug,token, minimal=False):
         print(f"changed {count} repo protocols")
     return True
 ##################################################################################
-def ssh_to_pat(line, token):
+def ssh_to_pat(line, server, token):
     old = line
-    line = line.replace("git@",f"https://oauth2:{token}@")
+    server_trunk = server.replace("https://","")            
+    line = line.replace(f"git@{server_trunk}:", f"https://oauth2:{token}@{server_trunk}/")    
     return old,line
 ##################################################################################
 def https_to_pat(line,token):
