@@ -16,6 +16,7 @@ def gl_clone_args(args,params):
 ##################################################################################
 def gl_clone_projects(params, dry,debug, all_projects=[]):
     print(f"---Gathering projects--- ")    
+    print("DEBUG 3")
     api = GitLabAPI(params["subgroup"], params["server"], params["wikis"])
     repo_len = api.repo_len    
     if all_projects == []:
@@ -57,8 +58,8 @@ def gl_clone_projects(params, dry,debug, all_projects=[]):
             #        #to_pull.append(gpath_wiki)
     return to_clone, to_pull
 ##################################################################################
-def gl_clone_clean(params, dry, all_projects=[]):    
-    api = GitLabAPI(params["subgroup"], params["server"], params["wikis"])
+def gl_clone_clean(params, dry, all_projects=[]):        
+    api = GitLabAPI(params["subgroup"], params["server"], params["wikis"],False)
     repo_len = api.repo_len
     scrch = Scratch(params["path"])    
     if all_projects == []:

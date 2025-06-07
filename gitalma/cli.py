@@ -56,6 +56,7 @@ def main():
     parser.add_argument("--dry", help="report what would be done (mkdir, clone and pull) but don't do it", action="store_true")    
     parser.add_argument("--single", help="override multithreaded behaviour, stay in single thread.", action="store_true")
     parser.add_argument("--root", help="run from home path no matter where in the repo you are.", action="store_true")
+    parser.add_argument("--minimal", help="choose to reduce output messages", action="store_true")
         
     args = parser.parse_args()
     thisversion = get_local_version()
@@ -64,6 +65,10 @@ def main():
         print("Local version:", thisversion)
         print("Github version:", gversion)
         exit()
+
+    minimal = False
+    if args.minimal:
+        minimal = True                
     
     start_time = datetime.datetime.now()            
     cwd = os.getcwd()        
@@ -124,14 +129,14 @@ def main():
         for key in clone_params:
             print(f"\t{key}: {clone_params[key]}")
         print("=====================================")
-    else: #less verbose logging        
+    elif not minimal:
         print("\n===== GITALMA from the ICR RSE Team =====")
         if "repo" in repo_params:        
             print(f"repo: {repo_params['repo']}")    
         elif "server" in repo_params:        
             print(f"server: {repo_params['server']}")
         if "path" in repo_params:        
-            print(f"path: {repo_params['path']}")            
+            print(f"path: {repo_params['path']}")                    
         print("Local/latest versions:", thisversion, "/", gversion)
         print("=====================================")
 
@@ -167,19 +172,24 @@ def main():
         git_pull_all(params, "history", args.dry, args.debug, None)
     elif args.action[0] == "change":
         if args.protocol:
-            print(f">> Changing to {args.protocol}")
+            if not minimal:
+                print(f">> Changing to {args.protocol}")
             token = None
-            if args.protocol == "pat":
-                api = GitLabAPI(params["subgroup"], params["server"], params["wikis"])
+            api = None
+            if args.protocol == "pat" or params["source"] in ["gitlab","icr"]:                
+                api = GitLabAPI(params["subgroup"], params["server"], params["wikis"], minimal)
                 token = api.token
-            git_change_protocol(params, args.protocol, args.dry, args.debug,token)
-            changed_params = init_save(params, params)
+            git_change_protocol(params, args.protocol, args.dry, args.debug,token, minimal=minimal)
+            changed_params = init_save(params, params, minimal, api)
             
         else:
-            print(f">> No change supplied, exiting")                                        
+            if not minimal:
+                print(f">> No change supplied, exiting")                                        
                             
     #----------------------------------------------------
     end_time = datetime.datetime.now()    
-    print("Completed in ", end_time-start_time)
-    print("=====================================")
+    if not minimal:
+        print("=====================================")
+        print("Completed in ", end_time-start_time)
+    
     

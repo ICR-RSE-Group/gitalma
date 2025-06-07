@@ -68,6 +68,7 @@ def main():
     parser.add_argument("--dry", help="report what would be done (mkdir, clone and pull) but don't do it", action="store_true")
     parser.add_argument("--single", help="override multithreaded behaviour, stay in single thread.", action="store_true")
     parser.add_argument("--root", help="run from home path no matter where in the repo you are.", action="store_true")
+    parser.add_argument("--minimal", help="choose to reduce output messages", action="store_true")
 
     args = parser.parse_args()
     thisversion = get_local_version()
@@ -76,6 +77,10 @@ def main():
         print("Local version:", thisversion)
         print("Github version:", gversion)
         exit()
+
+    minimal = False
+    if args.minimal:
+        minimal = True
 
     start_time = datetime.datetime.now()
     cwd = os.getcwd()
@@ -136,7 +141,7 @@ def main():
         for key in clone_params:
             print(f"\t{key}: {clone_params[key]}")
         print("=====================================")
-    else: #less verbose logging
+    elif not minimal:
         print("\n===== GITALMA from the ICR RSE Team =====")
         if "repo" in repo_params:
             print(f"repo: {repo_params['repo']}")
@@ -179,21 +184,26 @@ def main():
         git_pull_all(params, "history", args.dry, args.debug, None)
     elif args.action[0] == "change":
         if args.protocol:
-            print(f">> Changing to {args.protocol}")
+            if not minimal:
+                print(f">> Changing to {args.protocol}")
             token = None
-            if args.protocol == "pat":
-                api = GitLabAPI(params["subgroup"], params["server"], params["wikis"])
+            api = None
+            if args.protocol == "pat" or params["source"] in ["gitlab","icr"]:
+                api = GitLabAPI(params["subgroup"], params["server"], params["wikis"], minimal)
                 token = api.token
-            git_change_protocol(params, args.protocol, args.dry, args.debug,token)
-            changed_params = init_save(params, params)
+            git_change_protocol(params, args.protocol, args.dry, args.debug,token, minimal=minimal)
+            changed_params = init_save(params, params, minimal, api)
 
         else:
-            print(f">> No change supplied, exiting")
+            if not minimal:
+                print(f">> No change supplied, exiting")
 
     #----------------------------------------------------
     end_time = datetime.datetime.now()
-    print("Completed in ", end_time-start_time)
-    print("=====================================")
+    if not minimal:
+        print("=====================================")
+        print("Completed in ", end_time-start_time)
+
 
 ##########################################
 
@@ -216,7 +226,7 @@ class GitHubAPI:
 ##########################################
 
 class GitLabAPI:
-    def __init__(self, group_id, server, iswikis):
+    def __init__(self, group_id, server, iswikis, minimal):
         self.repo = ""
         self.group_id = int(group_id)
         self.repo_len = 0
@@ -245,7 +255,7 @@ class GitLabAPI:
             self.repo = ""
             self.repo_len = 0
             if int(group_id) != -1:
-                self.repo = self.get_repo_from_id(group_id)
+                self.repo = self.get_repo_from_id(group_id, minimal)
                 if self.repo == None:
                     print("Group ID not found")
                     exit()
@@ -319,11 +329,12 @@ class GitLabAPI:
             print("!!! Not safe to continue, exiting !!!")
             exit()
     ##################################################################################
-    def get_repo_from_id(self, group_id):
+    def get_repo_from_id(self, group_id, minimal):
         gitlab_url = f"{self.url}/api/v4/groups/{group_id}"
         response = requests.get(gitlab_url, headers=self.headers, data={"include_subgroups" : False, "with_projects" : False})
         if response.status_code == 200:
-            print("Group ID:",group_id,"is",response.json()["full_path"])
+            if not minimal:
+                print("Group ID:",group_id,"is",response.json()["full_path"])
             return response.json()["full_path"]
         else:
             return None
@@ -556,7 +567,7 @@ def git_message(process, msg, debug, force_msg=False):
             print("\n",msg, end="", flush=True)
     return connection_error
 ##################################################################################
-def git_change_protocol(params, new_protocol, dry, debug,token):
+def git_change_protocol(params, new_protocol, dry, debug,token, minimal=False):
     scrch = Scratch(params["path"])
     server = params["server"]
     to_change = scrch.gits
@@ -576,34 +587,34 @@ def git_change_protocol(params, new_protocol, dry, debug,token):
                     would_change = False
                     if "oauth2" in line:
                         if new_protocol == "https":
-                            line = pat_to_https(line)
-                            would_change = True
+                            old,line = pat_to_https(line)
+                            would_change = old != line
                         elif new_protocol == "ssh":
-                            line = pat_to_ssh(line, server)
-                            would_change = True
+                            old,line = pat_to_ssh(line, server)
+                            would_change = old != line
                         elif new_protocol == "pat":
-                            line = pat_to_pat(line,token)
-                            would_change = True
+                            old,line = pat_to_pat(line,token)
+                            would_change = old != line
                     elif "https://" in line:
                         if new_protocol == "pat":
-                            line = https_to_pat(line,token)
-                            would_change = True
+                            old,line = https_to_pat(line,token)
+                            would_change = old != line
                         elif new_protocol == "ssh":
-                            line = https_to_ssh(line, server)
-                            would_change = True
+                            old,line = https_to_ssh(line, server)
+                            would_change = old != line
                     elif "git@" in line:
                         if new_protocol == "pat":
-                            line = ssh_to_pat(line,token)
-                            would_change = True
+                            old,line = ssh_to_pat(line,token)
+                            would_change = old != line
                         elif new_protocol == "https":
-                            line = ssh_to_https(line, server)
-                            would_change = True
+                            old,line = ssh_to_https(line, server)
+                            would_change = old != line
                     if would_change:
                         count += 1
                         if dry:
                             print("would replace:", line)
-                        elif debug:
-                            print("replacing:", line)
+                        else:
+                            print("replacing:", line.strip())
 
                 new_lines.append(line)
 
@@ -612,47 +623,55 @@ def git_change_protocol(params, new_protocol, dry, debug,token):
                     for line in new_lines:
                         f.write(line)
 
-    print(f"\nchanged {count} repo protocols")
+    if count > 0:
+        print(f"changed {count} repo protocols")
     return True
 ##################################################################################
 def ssh_to_pat(line, token):
+    old = line
     line = line.replace("git@",f"https://oauth2:{token}@")
-    return line
+    return old,line
 ##################################################################################
 def https_to_pat(line,token):
+    old = line
     line = line.replace("https://",f"https://oauth2:{token}@")
-    return line
+    return old,line
 ##################################################################################
 def https_to_ssh(line, server):
+    old = line
     server_trunk = server.replace("https://","")
     line = line.replace(f"https://{server_trunk}/",f"git@{server_trunk}:")
     line = line.replace(f"git@{server_trunk}/", f"git@{server_trunk}:")
-    return line
+    return old,line
 ##################################################################################
 def ssh_to_https(line, server):
+    old = line
     server_trunk = server.replace("https://","")
     line = line.replace(f"git@{server_trunk}:", f"https://{server_trunk}/")
-    return line
+    return old,line
 ##################################################################################
 def pat_to_ssh(line, server):
+    old = line
     server_trunk = server.replace("https://","")
     lineA = line.split("https://")[0]
     lineB = line.split("@")[1]
     line = lineA + "git@" + lineB
     line = line.replace(f"git@{server_trunk}/", f"git@{server_trunk}:")
-    return line
+    return old,line
 ##################################################################################
 def pat_to_https(line):
+    old = line
     lineA = line.split("https://")[0]
     lineB = line.split("@")[1]
     line = lineA + "https://" + lineB
-    return line
+    return old,line
 ##################################################################################
 def pat_to_pat(line,token):
+    old = line
     lineA = line.split("https://")[0]
     lineB = line.split("@")[1]
     line =  lineA + f"https://oauth2:{token}@" + lineB
-    return line
+    return old,line
 ##################################################################################
 ##########################################
 #Author: Rachel Alcraft
@@ -714,6 +733,7 @@ def gl_clone_args(args,params):
 ##################################################################################
 def gl_clone_projects(params, dry,debug, all_projects=[]):
     print(f"---Gathering projects--- ")
+    print("DEBUG 3")
     api = GitLabAPI(params["subgroup"], params["server"], params["wikis"])
     repo_len = api.repo_len
     if all_projects == []:
@@ -756,7 +776,7 @@ def gl_clone_projects(params, dry,debug, all_projects=[]):
     return to_clone, to_pull
 ##################################################################################
 def gl_clone_clean(params, dry, all_projects=[]):
-    api = GitLabAPI(params["subgroup"], params["server"], params["wikis"])
+    api = GitLabAPI(params["subgroup"], params["server"], params["wikis"],False)
     repo_len = api.repo_len
     scrch = Scratch(params["path"])
     if all_projects == []:
@@ -845,7 +865,7 @@ def init_check_get(scrch,params):
             init_params = yaml.safe_load(yaml_file)#, Loader=yaml.FullLoader)
     return init_params
 ##################################################################################
-def init_save(new_params, orig_params):
+def init_save(new_params, orig_params, minimal, api):
     init_path = f"{new_params['home']}/.gitalma"
     os.makedirs(init_path, exist_ok=True)
     init_file = f"{new_params['home']}/.gitalma/init.yaml"
@@ -863,7 +883,6 @@ def init_save(new_params, orig_params):
             changed_params[key] = new_params[key]
     # now do a sanity check on the matching names of the path and groupip
     if changed_params["source"] in ["gitlab","icr"]:
-        api = GitLabAPI(changed_params["subgroup"],changed_params["server"], changed_params["wikis"])
         gp, rp = api.get_id_repo()
         changed_params["subgroup"] = gp
         changed_params["repo"] = rp
