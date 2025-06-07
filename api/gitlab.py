@@ -734,7 +734,7 @@ def gl_clone_args(args,params):
 def gl_clone_projects(params, dry,debug, all_projects=[]):
     print(f"---Gathering projects--- ")
     print("DEBUG 3")
-    api = GitLabAPI(params["subgroup"], params["server"], params["wikis"])
+    api = GitLabAPI(params["subgroup"], params["server"], params["wikis"], False)
     repo_len = api.repo_len
     if all_projects == []:
         all_projects,archived = api.list_projects()
@@ -1052,7 +1052,7 @@ if __name__ == "__main__":
     tmp_sys_arg = []
     for arg in sys.argv:
         tmp_sys_arg.append(arg)
-    sys.argv = sys.argv[:1] + ["change", "-protocol","pat"]
+    sys.argv = sys.argv[:1] + ["change", "-protocol","pat", "--minimal"]
     main()
     sys.argv = tmp_sys_arg
     # --------------------------------------------
