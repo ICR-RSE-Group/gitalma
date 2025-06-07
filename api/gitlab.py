@@ -733,7 +733,6 @@ def gl_clone_args(args,params):
 ##################################################################################
 def gl_clone_projects(params, dry,debug, all_projects=[]):
     print(f"---Gathering projects--- ")
-    print("DEBUG 3")
     api = GitLabAPI(params["subgroup"], params["server"], params["wikis"], False)
     repo_len = api.repo_len
     if all_projects == []:
