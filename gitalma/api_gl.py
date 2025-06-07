@@ -91,7 +91,7 @@ class GitLabAPI:
                         for val in response.json():
                             pages += 1
                     if pages > 0:                            
-                        print("wiki for project ID:", proj_id, project[2])                        
+                        #print("wiki for project ID:", proj_id, project[2])                        
                         gpath_wiki = f"{ppath}.wiki"
                         wiki_url = url.replace(".git", ".wiki.git")
                         wiki_projects.append((wiki_url, proj_id, gpath_wiki))

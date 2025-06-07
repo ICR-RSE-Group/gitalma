@@ -31,7 +31,7 @@ from .versions import *
 thisversion = "0.0.0"
 gversion = "0.0.0"
 
-def main():
+def main():    
     parser = argparse.ArgumentParser(description="GitLab pull or clone", 
         epilog="""
         GITLAB PULL SCRIPT FOR BCR-DataScienceTeam
@@ -74,9 +74,16 @@ def main():
     repo_params = init_check_get(scrch,new_params)
     #########################################################################################
     if args.action[0] == "init":        
-        changed_params = init_save(new_params, repo_params)
-        init_print(changed_params, init=True)
-        exit()
+        if scrch.gitalma:
+            print("Already initialised in", scrch.home)
+            exit()
+        elif scrch.gitalmaparent:            
+            print("Can't init parent - there are child gitalma repositories below this")
+            exit()
+        else:            
+            changed_params = init_save(new_params, repo_params)
+            init_print(changed_params, init=True)
+            exit()
     #########################################################################################
     if not scrch.gitalma:
         print("Not in a gitalma repository")
