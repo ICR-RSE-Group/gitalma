@@ -18,6 +18,7 @@ repos:
 -   SCRSE/LIBS: git@github.com:ICR-RSE-Group/pyalma.git
 -   SCRSE/LIBS: git@github.com:ICR-RSE-Group/gitalma.git
 -   SCRSE/LIBS: git@github.com:ICR-RSE-Group/appalma.git
+-   SCRSE/UTILS:: git@github.com:ICR-RSE-Group/shiny-proxy-config.git
 -   TARGTHER/Amy: git@github.com:rachelicr/nf-nearest.git
 -   COMPBIOL/Romanos: git@github.com:instituteofcancerresearch/ctv_shiny_app.git
 -   UROLHNTR: git@github.com:instituteofcancerresearch/HyProCare.git
