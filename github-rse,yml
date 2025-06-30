@@ -1,0 +1,28 @@
+path: /home/ralcraft/DEV/github-rse/SCRSE/LIBS/gitalma
+protocol: ssh
+multi: true
+root: false
+home: /home/ralcraft/DEV/github-rse
+source: github
+server: https://github.com
+subgroup: -1
+repos:
+-   GENFUNC/NEO: git@github.com:instituteofcancerresearch/neoantigens.git
+-   GENEVOD/HE: git@github.com:instituteofcancerresearch/he-class-app.git
+-   GENEVOD/HE: git@github.com:instituteofcancerresearch/he-class-pipeline.git
+-   SCRSE/ENGAGEMENT: git@github.com:AlmaCookBook/AlmaCookBook.github.io.git
+-   SCRSE/ENGAGEMENT: git@github.com:ICR-RSE-Group/ICR-RSE-Group.github.io.git
+-   SCRSE/ENGAGEMENT: git@github.com:ICR-RSE-Group/shiny-proxy-public.git
+-   SCRSE/APPS: git@github.com:ICR-RSE-Group/nextflow-app.git
+-   SCRSE/APPS: git@github.com:ICR-RSE-Group/green-alma.git
+-   SCRSE/LIBS: git@github.com:ICR-RSE-Group/pyalma.git
+-   SCRSE/LIBS: git@github.com:ICR-RSE-Group/gitalma.git
+-   SCRSE/LIBS: git@github.com:ICR-RSE-Group/appalma.git
+-   TARGTHER/Amy: git@github.com:rachelicr/nf-nearest.git
+-   COMPBIOL/Romanos: git@github.com:instituteofcancerresearch/ctv_shiny_app.git
+-   UROLHNTR: git@github.com:instituteofcancerresearch/HyProCare.git
+-   BCRBIOIN: git@github.com:instituteofcancerresearch/bcsinglecellalmanac-pdx-nac.git
+-   BCRBIOIN: git@github.com:instituteofcancerresearch/SYLVER.git
+
+wikis: false
+repo: ''
