@@ -15,6 +15,7 @@ repos:
 -   SCRSE/ENGAGEMENT: git@github.com:ICR-RSE-Group/shiny-proxy-public.git
 -   SCRSE/APPS: git@github.com:ICR-RSE-Group/nextflow-app.git
 -   SCRSE/APPS: git@github.com:ICR-RSE-Group/green-alma.git
+-   SCRSE/APPS: git@github.com:ICR-RSE-Group/du-alma.git
 -   SCRSE/LIBS: git@github.com:ICR-RSE-Group/pyalma.git
 -   SCRSE/LIBS: git@github.com:ICR-RSE-Group/gitalma.git
 -   SCRSE/LIBS: git@github.com:ICR-RSE-Group/appalma.git
