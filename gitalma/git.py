@@ -170,7 +170,7 @@ def git_message(process, msg, debug, force_msg=False):
     err = err.replace("implicit or explicit expectation of privacy. Please contact ICR","") 
     err = err.replace("Information Security (infosec@icr.ac.uk) for more information.","")                    
     #err = err.replace(" ","")
-    err = err.replace("\n","")    
+    #err = err.replace("\n","")    
     if err.upper() == err.lower():
         err = ""
     #err = err.replace("\t","")
