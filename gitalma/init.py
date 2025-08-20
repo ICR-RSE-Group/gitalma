@@ -15,9 +15,9 @@ def init_args(scrch, args):
     params["home"] = scrch.home    
     params["source"] = "icr" if not args.source else args.source
     params["wikis"] = False if not args.wikis else args.wikis
-    if params["wikis"].lower() == "true":
+    if str(params["wikis"]).lower() == "true":
         params["wikis"] = True
-    elif params["wikis"].lower() == "false":
+    elif str(params["wikis"]).lower() == "false":
         params["wikis"] = False
     if params["source"] == "icr":        
         params["server"] = "https://git.icr.ac.uk" if not args.server else args.server    
