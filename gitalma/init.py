@@ -15,6 +15,10 @@ def init_args(scrch, args):
     params["home"] = scrch.home    
     params["source"] = "icr" if not args.source else args.source
     params["wikis"] = False if not args.wikis else args.wikis
+    if str(params["wikis"]).lower() == "true":
+        params["wikis"] = True
+    elif str(params["wikis"]).lower() == "false":
+        params["wikis"] = False
     if params["source"] == "icr":        
         params["server"] = "https://git.icr.ac.uk" if not args.server else args.server    
     elif params["source"] == "gitlab":
@@ -59,6 +63,13 @@ def init_save(new_params, orig_params, minimal, api):
                 print(f"Changing {key} from {orig_params[key]} to {new_params[key]}")
         if key == "home":
             changed_params[key] = str(new_params[key])
+        elif key == "wikis" or key == "multi" or key == "root":
+            if str(new_params[key]).lower() == "true":
+                changed_params[key] = True
+            elif str(new_params[key]).lower() == "false":
+                changed_params[key] = False
+            else:
+                changed_params[key] = new_params[key]
         else:
             changed_params[key] = new_params[key]
     # now do a sanity check on the matching names of the path and groupip
