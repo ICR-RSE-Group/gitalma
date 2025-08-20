@@ -883,7 +883,7 @@ def init_save(new_params, orig_params, minimal, api):
                 print(f"Changing {key} from {orig_params[key]} to {new_params[key]}")
         if key == "home":
             changed_params[key] = str(new_params[key])
-        elif key == "wikis":
+        elif key == "wikis" or key == "multi" or key == "root":
             if str(new_params[key]).lower() == "true":
                 changed_params[key] = True
             elif str(new_params[key]).lower() == "false":
