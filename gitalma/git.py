@@ -144,8 +144,9 @@ def git_pull(gpath, msg, file_size, debug):
 ########################################################################
 def git_filesize(gpath, msg, file_size, full_msg, debug):             
     gitignore = []
+    ignore_history = False
     for root, dirs, files in os.walk(gpath):        
-        if '.git' in dirs:
+        if ignore_history and '.git' in dirs:        
             dirs.remove('.git')
         for filename in files:
             file_path = Path(root) / filename.replace(gpath,"")

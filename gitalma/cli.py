@@ -189,7 +189,7 @@ def main():
                 api = GitLabAPI(params["subgroup"], params["server"], params["wikis"], minimal)
                 token = api.token
             git_change_protocol(params, args.protocol, args.dry, args.debug,token, minimal=minimal)
-            changed_params = init_save(params, params, minimal, api)
+            changed_params = init_save(params, params, api)
             
         else:
             if not minimal:
