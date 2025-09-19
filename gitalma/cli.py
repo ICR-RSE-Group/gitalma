@@ -50,7 +50,8 @@ def main():
     parser.add_argument("-subgroup", help="the gitlab subgroup number which is the root of the gitlab projects", type=int)    
     parser.add_argument("-protocol", help="override default https clone behaviour with ssh", type=str)    
     parser.add_argument("-wikis", help="Whether to look for wikis too", type=bool)
-        
+    parser.add_argument("-ignore_size", help="If > 0 a size to add to the .gitignore", type=int)
+
     # The flags        
     parser.add_argument("--debug", help="outputs extra logs for debugging", action="store_true")
     parser.add_argument("--dry", help="report what would be done (mkdir, clone and pull) but don't do it", action="store_true")    
@@ -118,6 +119,8 @@ def main():
         params[key] = clone_params[key]
     if "wikis" not in params:
         params["wikis"] = False
+    if "ignore_size" not in params:
+        params["ignore_size"] = 100000000        
     if args.debug:
         print("===========================================")
         print("===== GIT-ALMA from the ICR RSE Team =====")
@@ -157,19 +160,25 @@ def main():
             print(f">> Cloning {len(to_clone)} projects --- ")
             git_clone_all(params, args.dry, args.debug, to_clone)
         if to_pull != []:
-            print(f">> Pulling {len(to_pull)} projects --- ")
-            git_pull_all(params, "pull", args.dry, args.debug, to_pull)
+            print(f">> Pulling {len(to_pull)} projects --- ")            
+            git_pull_all(params, "pull", args.dry, args.debug, to_pull, params["ignore_size"])
     elif args.action[0] == "pull":                
         print(f">> Pull projects---")
-        git_pull_all(params, "pull", args.dry, args.debug,None)
+        git_pull_all(params, "pull", args.dry, args.debug,None, None)
     elif args.action[0] == "clean":                     
         gl_clone_clean(params, args.dry)
     elif args.action[0] == "status":                    
         print(f">> Status projects---")
-        git_pull_all(params, "status", args.dry, args.debug,None)
+        git_pull_all(params, "status", args.dry, args.debug,None,None)
     elif args.action[0] == "history":                   
         print(f">> History projects---")
-        git_pull_all(params, "history", args.dry, args.debug, None)
+        git_pull_all(params, "history", args.dry, args.debug, None,None)
+    elif args.action[0] == "filesize":
+        print(f">> File-size projects---")
+        git_pull_all(params, "filesize", args.dry, args.debug, None,params["ignore_size"])
+    elif args.action[0] == "gitignore":
+        print(f">> Git-ignore projects---")
+        git_pull_all(params, "gitignore", args.dry, args.debug, None,params)
     elif args.action[0] == "change":
         if args.protocol:
             if not minimal:
@@ -180,7 +189,7 @@ def main():
                 api = GitLabAPI(params["subgroup"], params["server"], params["wikis"], minimal)
                 token = api.token
             git_change_protocol(params, args.protocol, args.dry, args.debug,token, minimal=minimal)
-            changed_params = init_save(params, params, minimal, api)
+            changed_params = init_save(params, params, api)
             
         else:
             if not minimal:
