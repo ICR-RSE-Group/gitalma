@@ -103,17 +103,18 @@ def main():
             init_print(changed_params, init=True)
             exit()
     #########################################################################################
-    if not scrch.gitalma:
-        print("Not in a gitalma repository")
-        if scrch.working.endswith("/bcrbioinformatics"):
-            print("Initialising gitalma repository")
-            params = {"path": scrch.working,
+    new_init_params = {"path": scrch.working,
                       "home": scrch.working,
                       "subgroup":2879,
                       "source":"icr",
                       "server":"https://git.icr.ac.uk",
-                      "protocol":"pat"}
-            params = init_save(params, params)
+                      "protocol":"pat",
+                      "wikis":False,}
+    if not scrch.gitalma:
+        print("Not in a gitalma repository")
+        if scrch.working.endswith("/bcrbioinformatics"):
+            print("Initialising gitalma repository")
+            params = init_save(new_init_params, new_init_params)
             init_print(params, init=True)
             exit()
         else:
@@ -123,16 +124,21 @@ def main():
     repo_params = init_check_get(scrch,new_params)
     clone_params = gl_clone_args(args,cmd_params)
     params = {}
-    for key in cmd_params:
-        params[key] = cmd_params[key]
-    for key in repo_params:
-        params[key] = repo_params[key]
-    for key in clone_params:
-        params[key] = clone_params[key]
+    if cmd_params:
+        for key in cmd_params:
+            params[key] = cmd_params[key]
+    if repo_params:
+        for key in repo_params:
+            params[key] = repo_params[key]
+    if clone_params:
+        for key in clone_params:
+            params[key] = clone_params[key]
     if "wikis" not in params:
         params["wikis"] = False
-    if "ignore_size" not in params:
-        params["ignore_size"] = 100000000
+    # Put all init params in just incase they are missing
+    for key in new_init_params:
+        if key not in params:
+            params[key] = new_init_params[key]
     if args.debug:
         print("===========================================")
         print("===== GIT-ALMA from the ICR RSE Team =====")
@@ -933,7 +939,7 @@ def init_check_get(scrch,params):
             init_params = yaml.safe_load(yaml_file)#, Loader=yaml.FullLoader)
     return init_params
 ##################################################################################
-def init_save(new_params, orig_params, api=None):
+def init_save(new_params, orig_params, minimal=True, api=None):
     init_path = f"{new_params['home']}/.gitalma"
     os.makedirs(init_path, exist_ok=True)
     init_file = f"{new_params['home']}/.gitalma/init.yaml"
@@ -957,7 +963,8 @@ def init_save(new_params, orig_params, api=None):
         else:
             changed_params[key] = new_params[key]
     # now do a sanity check on the matching names of the path and groupip
-    if changed_params["source"] in ["gitlab","icr"] and api is not None:
+    if changed_params["source"] in ["gitlab","icr"]:
+        api = GitLabAPI(changed_params["subgroup"],changed_params["server"], changed_params["wikis"], minimal)
         gp, rp = api.get_id_repo()
         changed_params["subgroup"] = gp
         changed_params["repo"] = rp
@@ -1080,7 +1087,7 @@ class Scratch:
 
 ##########################################
 
-LVERSION  = '1.2.0'
+LVERSION  = '1.6.1'
 
 def get_github_version():
     # get the file contents of the github file
