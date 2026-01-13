@@ -90,17 +90,18 @@ def main():
             init_print(changed_params, init=True)
             exit()
     #########################################################################################
-    if not scrch.gitalma:
-        print("Not in a gitalma repository")
-        if scrch.working.endswith("/bcrbioinformatics"):
-            print("Initialising gitalma repository")
-            params = {"path": scrch.working,
+    new_init_params = {"path": scrch.working,
                       "home": scrch.working,
                       "subgroup":2879,
                       "source":"icr",
                       "server":"https://git.icr.ac.uk",
-                      "protocol":"pat"}            
-            params = init_save(params, params)
+                      "protocol":"pat",
+                      "wikis":False,}
+    if not scrch.gitalma:
+        print("Not in a gitalma repository")
+        if scrch.working.endswith("/bcrbioinformatics"):
+            print("Initialising gitalma repository")           
+            params = init_save(new_init_params, new_init_params)
             init_print(params, init=True)
             exit()
         else:
@@ -110,14 +111,21 @@ def main():
     repo_params = init_check_get(scrch,new_params)
     clone_params = gl_clone_args(args,cmd_params)
     params = {}
-    for key in cmd_params:
-        params[key] = cmd_params[key]
-    for key in repo_params:
-        params[key] = repo_params[key]
-    for key in clone_params:
-        params[key] = clone_params[key]
+    if cmd_params:
+        for key in cmd_params:
+            params[key] = cmd_params[key]
+    if repo_params:
+        for key in repo_params:
+            params[key] = repo_params[key]
+    if clone_params:
+        for key in clone_params:
+            params[key] = clone_params[key]
     if "wikis" not in params:
         params["wikis"] = False
+    # Put all init params in just incase they are missing
+    for key in new_init_params:
+        if key not in params:
+            params[key] = new_init_params[key]
     if args.debug:
         print("===========================================")
         print("===== GIT-ALMA from the ICR RSE Team =====")
