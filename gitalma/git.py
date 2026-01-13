@@ -16,7 +16,7 @@ KEEPS = 10
 
 
 ##################################################################################
-def git_pull_all(params, action, dry,debug, to_pull):    
+def git_pull_all(params, action, dry,debug, to_pull, file_size):    
     threads_to_pull = list()    
     scrch = Scratch(params["path"])            
     count = 0
@@ -37,23 +37,33 @@ def git_pull_all(params, action, dry,debug, to_pull):
                     x = None
                     if action == "pull":
                         time.sleep(THROTTLE_PULL)
-                        x = threading.Thread(target=git_pull, args=(gpath, msg,debug))
+                        x = threading.Thread(target=git_pull, args=(gpath, msg,file_size, debug))
                     elif action == "status":
                         time.sleep(THROTTLE_STATUS)
                         x = threading.Thread(target=git_status, args=(gpath, msg,debug))
                     elif action == "history":
                         time.sleep(THROTTLE_STATUS)
                         x = threading.Thread(target=git_history, args=(gpath, msg,debug))
+                    elif action == "filesize":
+                        time.sleep(THROTTLE_STATUS)
+                        x = threading.Thread(target=git_filesize, args=(gpath, msg, file_size, True, debug))
+                    elif action == "gitignore":
+                        time.sleep(THROTTLE_STATUS)
+                        x = threading.Thread(target=git_ignore, args=(gpath, msg, debug))
                     if x != None:
                         threads_to_pull.append(x)
                         x.start()
                 else:
                     if action == "pull":
-                        git_pull(gpath, msg,debug)
+                        git_pull(gpath, msg,file_size,debug)
                     elif action == "status":
                         git_status(gpath, msg,debug)                
                     elif action == "history":
                         git_status(gpath, msg,debug)                
+                    elif action == "filesize":
+                        git_filesize(gpath, msg, file_size, True, debug)
+                    elif action == "gitignore":
+                        git_ignore(gpath, msg, debug)
     if params["multi"]:        
         for index, thread in enumerate(threads_to_pull):
             thread.join()        
@@ -113,12 +123,12 @@ def git_clone(phttps, spath, msg, debug):
         print(f"\n{phttps} succeeded after {count} times")
     return True
 ##################################################################################
-def git_pull(gpath, msg, debug):           
+def git_pull(gpath, msg, file_size, debug):           
+    git_filesize(gpath, msg, file_size, False, debug)
     keep_going = True
     count = 0
     while keep_going and count < KEEPS:
-        count += 1
-        #process = subprocess.run(["git", "-C", gpath, "pull","--rebase"],stdout=subprocess.PIPE, stderr=subprocess.PIPE)            
+        count += 1        
         process = subprocess.run(["git", "-C", gpath, "pull"],stdout=subprocess.PIPE, stderr=subprocess.PIPE)            
         keep_going = git_message(process, msg, debug, count == KEEPS)
         if keep_going:
@@ -131,6 +141,51 @@ def git_pull(gpath, msg, debug):
     elif count > 10:
         print(f"\n{gpath} succeeded after {count} times")
     return True
+########################################################################
+def git_filesize(gpath, msg, file_size, full_msg, debug):             
+    gitignore = []
+    ignore_history = False
+    for root, dirs, files in os.walk(gpath):        
+        if ignore_history and '.git' in dirs:        
+            dirs.remove('.git')
+        for filename in files:
+            file_path = Path(root) / filename.replace(gpath,"")
+            if file_path.stat().st_size > file_size:                
+                gitignore.append((str(file_path).strip(),file_path.stat().st_size))    
+    gitignore_path = Path(gpath) / ".gitignore"    
+    if len(gitignore) > 0:        
+        if full_msg:
+            print(f"\nThe following files are larger than {file_size} bytes in {gpath}:")
+            for gi, sz in gitignore:
+                print("\t",sz, gi)        
+        existing = []
+        with open(gitignore_path, "a+") as f:
+            f.seek(0)
+            existing = f.read().splitlines()        
+        existing = [line.strip() for line in existing]        
+        gitignore_2 = []
+        for gi,sz in gitignore:
+            rel_path = os.path.relpath(gi, gpath)
+            if rel_path not in existing:
+                gitignore_2.append(rel_path)                
+        if len(gitignore_2) > 0:
+            print(f"\tAdding {len(gitignore_2)} files to .gitignore in {gpath}")
+        if not debug:
+            with open(gitignore_path, "a") as f:
+                for gi in gitignore_2:                                        
+                    print(f"\t\tNew file to add {rel_path}")
+                    f.write(gi + "\n")    
+    return False
+def git_ignore(gpath, msg, debug):         
+    gitignore_path = Path(gpath) / ".gitignore"    
+    if gitignore_path.exists():
+        print(f"\nThis repo has a gitignore {gpath}")
+        with open(gitignore_path, "r") as f:
+            for line in f:
+                line = line.strip()
+                if line != "": 
+                    print("\t",line)    
+    return False
 ##################################################################################
 def git_status(gpath, msg, debug):    
     process = subprocess.run(["git", "-C", gpath, "status"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)    
