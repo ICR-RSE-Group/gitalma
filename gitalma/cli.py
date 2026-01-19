@@ -123,7 +123,7 @@ def main():
             params[key] = clone_params[key]
     if "wikis" not in params:
         params["wikis"] = False
-     if "ignore_size" not in params:
+    if "ignore_size" not in params:
         params["ignore_size"] = 100000000  
     # Put all init params in just incase they are missing
     for key in new_init_params:
