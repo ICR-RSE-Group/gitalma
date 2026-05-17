@@ -394,7 +394,7 @@ KEEPS = 10
 
 
 ##################################################################################
-def git_pull_all(params, action, dry,debug, to_pull, file_size):
+def git_pull_all(params, action, dry,debug, to_pull, file_size, date):
     threads_to_pull = list()
     scrch = Scratch(params["path"])
     count = 0
