@@ -13,8 +13,10 @@ python -m pip uninstall gitalma
 
 ## To develop this library
 ```bash
+# conda remove --name gitalma-env --all
 conda create -n gitalma-env -c conda-forge python=3.12
 conda activate gitalma-env
+# python -m pip uninstall gitalma
 python -m pip install -e ".[dev]"
 ```
 
