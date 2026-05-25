@@ -31,65 +31,73 @@ from .versions import *
 thisversion = "0.0.0"
 gversion = "0.0.0"
 
-def main():    
-    parser = argparse.ArgumentParser(description="GitLab pull or clone", 
+def main():
+    parser = argparse.ArgumentParser(description="GitLab pull or clone",
         epilog="""
         GITLAB PULL SCRIPT FOR BCR-DataScienceTeam
         This module downloads dynamically all the projects from gitlab and clones if absent or pulls if present.
-        Example inputs (all default to standard options):          
+        Example inputs (all default to standard options):
         git-alma --status
         """)
     parser.add_argument("--version", help="returns the version", action="store_true")
-    # The main commands    
+    # The main commands
     actions_help = "actions = [init, info, pull, update, clean, status, history,change,upgrade]"
-    parser.add_argument("action", nargs=1, help=actions_help)    
+    parser.add_argument("action", nargs=1, help=actions_help)
     # The paramaters that need values
     parser.add_argument("-source", help="target is the production repo, test is the repo that is being tested and not updated", type=str)
     parser.add_argument("-path", help="is the path to the root of the gitlab projects", type=str)
     parser.add_argument("-server", help="The url to gitlab or github", type=str)
-    parser.add_argument("-subgroup", help="the gitlab subgroup number which is the root of the gitlab projects", type=int)    
-    parser.add_argument("-protocol", help="override default https clone behaviour with ssh", type=str)    
+    parser.add_argument("-subgroup", help="the gitlab subgroup number which is the root of the gitlab projects", type=int)
+    parser.add_argument("-protocol", help="override default https clone behaviour with ssh", type=str)
     parser.add_argument("-wikis", help="Whether to look for wikis too", type=bool)
+    parser.add_argument("-url", help="The url if config is a web source (source=web)", type=str)
     parser.add_argument("-ignore_size", help="If > 0 a size to add to the .gitignore", type=int)
+    parser.add_argument("-date", help='The commit before the given datetime in format "2026-05-01 23:59:59" or "latest"', type=str)
 
-    # The flags        
+    # The flags
     parser.add_argument("--debug", help="outputs extra logs for debugging", action="store_true")
-    parser.add_argument("--dry", help="report what would be done (mkdir, clone and pull) but don't do it", action="store_true")    
+    parser.add_argument("--dry", help="report what would be done (mkdir, clone and pull) but don't do it", action="store_true")
     parser.add_argument("--single", help="override multithreaded behaviour, stay in single thread.", action="store_true")
     parser.add_argument("--root", help="run from home path no matter where in the repo you are.", action="store_true")
     parser.add_argument("--minimal", help="choose to reduce output messages", action="store_true")
-        
+
     args = parser.parse_args()
     thisversion = get_local_version()
     gversion = get_github_version()
-    if args.version:        
+    if args.version:
         print("Local version:", thisversion)
         print("Github version:", gversion)
         exit()
 
     minimal = False
     if args.minimal:
-        minimal = True                
-    
-    start_time = datetime.datetime.now()            
-    cwd = os.getcwd()        
+        minimal = True
+
+    start_time = datetime.datetime.now()
+    cwd = os.getcwd()
     scrch = Scratch(cwd)
     if not scrch.gitalma:
         scrch.home = str(scrch.path)
     new_params = init_args(scrch, args)
     repo_params = init_check_get(scrch,new_params)
-    #########################################################################################
-    if args.action[0] == "init":        
+    #########################################################################################        
+    if args.action[0] == "init":
         if scrch.gitalma:
             print("Already initialised in", scrch.home)
             exit()
-        elif scrch.gitalmaparent:            
+        elif scrch.gitalmaparent:
             print("Can't init parent - there are child gitalma repositories below this")
             exit()
-        else:            
-            changed_params = init_save(new_params, repo_params)
-            init_print(changed_params, init=True)
-            exit()
+        
+        else:                
+            if new_params["source"].lower() == "web":                
+                changed_params = init_web(new_params, repo_params)
+                init_print(changed_params, init=True)
+                exit()
+            else:        
+                changed_params = init_save(new_params, repo_params)
+                init_print(changed_params, init=True)
+                exit()
     #########################################################################################
     new_init_params = {"path": scrch.working,
                       "home": scrch.working,
@@ -101,12 +109,12 @@ def main():
     if not scrch.gitalma:
         print("Not in a gitalma repository")
         if scrch.working.endswith("/bcrbioinformatics"):
-            print("Initialising gitalma repository")           
+            print("Initialising gitalma repository")
             params = init_save(new_init_params, new_init_params)
             init_print(params, init=True)
             exit()
         else:
-            exit()    
+            exit()
     new_params = init_args(scrch, args)
     cmd_params = cmd_args(args)
     repo_params = init_check_get(scrch,new_params)
@@ -121,92 +129,98 @@ def main():
     if clone_params:
         for key in clone_params:
             params[key] = clone_params[key]
+
+
+
+
     if "wikis" not in params:
         params["wikis"] = False
     if "ignore_size" not in params:
-        params["ignore_size"] = 100000000  
+        params["ignore_size"] = 100000000
+    if "date" not in params:
+        params["date"] = ""
     # Put all init params in just incase they are missing
     for key in new_init_params:
         if key not in params:
-            params[key] = new_init_params[key]         
+            params[key] = new_init_params[key]
     if args.debug:
         print("===========================================")
         print("===== GIT-ALMA from the ICR RSE Team =====")
         print("===========================================")
-        print("-Config repo params-")    
-        for key in repo_params:        
-            print(f"\t{key}: {repo_params[key]}")    
-        print("-Params entered-")    
+        print("-Config repo params-")
+        for key in repo_params:
+            print(f"\t{key}: {repo_params[key]}")
+        print("-Params entered-")
         for key in clone_params:
             print(f"\t{key}: {clone_params[key]}")
         print("=====================================")
     elif not minimal:
         print("\n===== GITALMA from the ICR RSE Team =====")
-        if "repo" in repo_params:        
-            print(f"repo: {repo_params['repo']}")    
-        elif "server" in repo_params:        
+        if "repo" in repo_params:
+            print(f"repo: {repo_params['repo']}")
+        elif "server" in repo_params:
             print(f"server: {repo_params['server']}")
-        if "path" in repo_params:        
-            print(f"path: {repo_params['path']}")                    
+        if "path" in repo_params:
+            print(f"path: {repo_params['path']}")
         print("Local/latest versions:", thisversion, "/", gversion)
         print("=====================================")
 
-    #########################################################################################    
+    #########################################################################################
     if args.root:
         params["path"] = params["home"]
         scrch = Scratch(params["path"])
-    if args.action[0] == "info":        
+    if args.action[0] == "info":
         init_print(repo_params, init=False)
-    elif args.action[0] == "update":        
+    elif args.action[0] == "update":
         if params["source"] in ["gitlab","icr"]:
             print(f">> Check projects to delete --- ")
             all_projects,archived = gl_clone_clean(params, args.dry)
-            to_clone, to_pull = gl_clone_projects(params, args.dry, args.debug, all_projects)                
+            to_clone, to_pull = gl_clone_projects(params, args.dry, args.debug, all_projects)
         else:
             to_clone, to_pull = gh_clone_projects(params, args.dry, args.debug)
         if to_clone != []:
             print(f">> Cloning {len(to_clone)} projects --- ")
             git_clone_all(params, args.dry, args.debug, to_clone)
         if to_pull != []:
-            print(f">> Pulling {len(to_pull)} projects --- ")            
-            git_pull_all(params, "pull", args.dry, args.debug, to_pull, params["ignore_size"])
-    elif args.action[0] == "pull":                
+            print(f">> Pulling {len(to_pull)} projects --- ")
+            git_pull_all(params, "pull", args.dry, args.debug, to_pull, params["ignore_size"], params["date"])
+    elif args.action[0] == "pull":
         print(f">> Pull projects---")
-        git_pull_all(params, "pull", args.dry, args.debug,None, None)
-    elif args.action[0] == "clean":                     
+        git_pull_all(params, "pull", args.dry, args.debug,None, None,None)
+    elif args.action[0] == "clean":
         gl_clone_clean(params, args.dry)
-    elif args.action[0] == "status":                    
+    elif args.action[0] == "status":
         print(f">> Status projects---")
-        git_pull_all(params, "status", args.dry, args.debug,None,None)
-    elif args.action[0] == "history":                   
+        git_pull_all(params, "status", args.dry, args.debug,None,None,None)
+    elif args.action[0] == "history":
         print(f">> History projects---")
-        git_pull_all(params, "history", args.dry, args.debug, None,None)
+        git_pull_all(params, "history", args.dry, args.debug, None,None,None)
     elif args.action[0] == "filesize":
         print(f">> File-size projects---")
-        git_pull_all(params, "filesize", args.dry, args.debug, None,params["ignore_size"])
+        git_pull_all(params, "filesize", args.dry, args.debug, None,params["ignore_size"],None)
     elif args.action[0] == "gitignore":
         print(f">> Git-ignore projects---")
-        git_pull_all(params, "gitignore", args.dry, args.debug, None,params)
+        git_pull_all(params, "gitignore", args.dry, args.debug, None,params,None)
     elif args.action[0] == "change":
         if args.protocol:
             if not minimal:
                 print(f">> Changing to {args.protocol}")
             token = None
             api = None
-            if args.protocol == "pat" or params["source"] in ["gitlab","icr"]:                
+            if args.protocol == "pat" or params["source"] in ["gitlab","icr"]:
                 api = GitLabAPI(params["subgroup"], params["server"], params["wikis"], minimal)
                 token = api.token
             git_change_protocol(params, args.protocol, args.dry, args.debug,token, minimal=minimal)
             changed_params = init_save(params, params, minimal, api)
-            
+
         else:
             if not minimal:
-                print(f">> No change supplied, exiting")                                        
-                            
+                print(f">> No change supplied, exiting")
+
     #----------------------------------------------------
-    end_time = datetime.datetime.now()    
+    end_time = datetime.datetime.now()
     if not minimal:
         print("=====================================")
         print("Completed in ", end_time-start_time)
-    
-    
+
+

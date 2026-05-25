@@ -4,50 +4,117 @@
 import os
 import yaml
 from .api_gl import GitLabAPI
+import requests
 
-##################################################################################      
+##################################################################################
 ### Command line parsing ###
 def init_args(scrch, args):
-    params = {}    
+    params = {}
     params["path"] = os.getcwd() if not args.path else args.path
-    if not scrch.gitalma:    
+    if not scrch.gitalma:
         scrch.home = str(params["path"])
-    params["home"] = scrch.home    
+    params["home"] = scrch.home
     params["source"] = "icr" if not args.source else args.source
     params["wikis"] = False if not args.wikis else args.wikis
+    
     if str(params["wikis"]).lower() == "true":
         params["wikis"] = True
     elif str(params["wikis"]).lower() == "false":
         params["wikis"] = False
-    if params["source"] == "icr":        
-        params["server"] = "https://git.icr.ac.uk" if not args.server else args.server    
+    
+    if params["source"] == "icr":
+        params["server"] = "https://git.icr.ac.uk" if not args.server else args.server
     elif params["source"] == "gitlab":
         params["server"] = "https://gitlab.com" if not args.server else args.server
     elif params["source"] == "github":
         params["server"] = "https://github.com" if not args.server else args.server
+    elif params["source"] == "web":
+        params["url"] = "<web_url>" if not args.url else args.url
     else:
-        params["server"] = "https://git.icr.ac.uk" if not args.server else args.server    
+        params["server"] = "https://git.icr.ac.uk" if not args.server else args.server
+    
     if params["source"] == "gitlab" or params["source"] == "icr":
         params["protocol"] = "pat" if not args.protocol else args.protocol
     else:
         params["protocol"] = "https" if not args.protocol else args.protocol
-    params["subgroup"] = -1 if not args.subgroup else args.subgroup    
+    params["subgroup"] = -1 if not args.subgroup else args.subgroup
     return params
 ##################################################################################
 def cmd_args(args):
-    params = {}    
+    params = {}
+    skip = {"action", "version"}
+    for key, value in vars(args).items():
+        if key in skip or isinstance(value, bool) or value is None:
+            continue
+        params[key] = value
     params["path"] = os.getcwd() if not args.path else args.path
-    if args.protocol:
-        params["protocol"] = args.protocol
     return params
 ##################################################################################
 def init_check_get(scrch,params):
-    init_params = {}    
+    init_params = {}
     init_path = f"{scrch.home}/.gitalma/init.yaml"
-    if os.path.exists(init_path):    
+    if os.path.exists(init_path):
         with open(init_path, "r") as yaml_file:
-            init_params = yaml.safe_load(yaml_file)#, Loader=yaml.FullLoader)                                
+            init_params = yaml.safe_load(yaml_file)#, Loader=yaml.FullLoader)
     return init_params
+##################################################################################
+def init_web(new_params, orig_params):        
+    changed_params = {}   
+    print(new_params)
+    print(orig_params)     
+    if "url" not in new_params:
+        print("Error: url not specified in web init file")
+        exit()
+    
+    if new_params["url"] == "<web_url>":
+        print("Error: url not specified in web init file")
+        exit()
+    # the source is a github text file eg https://raw.githubusercontent.com/rachel-alcraft/gitalma/main/webinit_gitlab.txt
+    websource = new_params["url"].lower()
+    print("Getting init params from web source", websource)
+    # check it exists and is a text file
+    try:
+        response = requests.head(websource)
+        if response.status_code != 200:
+            print("Error: web source not found")
+            exit()        
+    except Exception as e:
+        print("Error: web source not found", e)
+        exit()
+
+    response = requests.get(websource)
+    for line in response.text.split('\n'):        
+        print(line)
+        if ":" in line:            
+            lines = line.split(': ', 1)
+            if len(lines) > 1:
+                key = lines[0].strip()
+                value = lines[1].strip()            
+                changed_params[key] = value  
+                print(f"Got {key} from web source with value {value}")        
+    # now do a sanity check on the matching names of the path and groupip
+    if changed_params["source"] in ["gitlab","icr"]:
+        api = GitLabAPI(changed_params["subgroup"],changed_params["server"], changed_params["wikis"], minimal)
+        gp, rp = api.get_id_repo()
+        changed_params["subgroup"] = gp
+        changed_params["repo"] = rp
+
+    ##############################################
+    init_path = f"{new_params['home']}/.gitalma"        
+    init_file = f"{new_params['home']}/.gitalma/init.yaml"
+    os.makedirs(init_path, exist_ok=True)
+    
+    empty_params = {}
+    empty_params["home"] = new_params["home"]
+    empty_params["path"] = new_params["path"]
+
+    with open(init_file, "w") as yaml_file:
+        yaml.dump(empty_params, yaml_file, default_flow_style=False, indent=4, width=80, sort_keys=False)
+
+    with open(init_file, "a") as yaml_file:
+        for line in response.text.split('\n'):
+            yaml_file.write(line + "\n")    
+    return changed_params
 ##################################################################################
 def init_save(new_params, orig_params, minimal=True, api=None):
     init_path = f"{new_params['home']}/.gitalma"
@@ -57,7 +124,7 @@ def init_save(new_params, orig_params, minimal=True, api=None):
     # put orig params in first then any overwrites
     for key in orig_params:
         changed_params[key] = orig_params[key]
-    for key in new_params:                        
+    for key in new_params:
         if key in changed_params:
             if orig_params[key] != new_params[key]:
                 print(f"Changing {key} from {orig_params[key]} to {new_params[key]}")
@@ -73,12 +140,12 @@ def init_save(new_params, orig_params, minimal=True, api=None):
         else:
             changed_params[key] = new_params[key]
     # now do a sanity check on the matching names of the path and groupip
-    if changed_params["source"] in ["gitlab","icr"]:                
+    if changed_params["source"] in ["gitlab","icr"]:
         api = GitLabAPI(changed_params["subgroup"],changed_params["server"], changed_params["wikis"], minimal)
         gp, rp = api.get_id_repo()
         changed_params["subgroup"] = gp
         changed_params["repo"] = rp
-                
+
     with open(init_file, "w") as yaml_file:
         yaml.dump(changed_params, yaml_file, default_flow_style=False, indent=4, width=80, sort_keys=False)
     
@@ -95,17 +162,16 @@ def init_print(params,init):
         num_tabs = 2 - len(key)//8
         print(key, num_tabs*"\t",params[key])
 ##################################################################################
-        
-    
 
-    
-    
-          
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+

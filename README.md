@@ -11,6 +11,13 @@ python -m pip install git+https://github.com/ICR-RSE-Group/gitalma.git
 python -m pip uninstall gitalma
 ```
 
+## To develop this library
+```bash
+conda create -n gitalma-env -c conda-forge python=3.12
+conda activate gitalma-env
+python -m pip install -e ".[dev]"
+```
+
 ## Install as a single file gitlab.py
 The alternative installation is as the single file gitlab.py, which can be done either by installing it and using the explicit path.
 ```
@@ -63,4 +70,9 @@ repos:
 -   SCRSE/APPS: git@github.com:ICR-RSE-Group/green-alma.git
 -   GENEVOD/HE: git@github.com:instituteofcancerresearch/he-class-app.git
 -   GENEVOD/HE: git@github.com:instituteofcancerresearch/he-class-pipeline.git
+```
+
+To use a config file on github use the raw contensts, e.g.
+```bash
+gitalma init -source web -url https://raw.githubusercontent.com/ICR-RSE-Group/gitalma/refs/heads/main/tests/self.yml
 ```

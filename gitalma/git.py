@@ -16,28 +16,29 @@ KEEPS = 10
 
 
 ##################################################################################
-def git_pull_all(params, action, dry,debug, to_pull, file_size):    
-    threads_to_pull = list()    
-    scrch = Scratch(params["path"])            
+def git_pull_all(params, action, dry,debug, to_pull, file_size, date):
+    print(f">> {action}ing projects--- date={date}")
+    threads_to_pull = list()
+    scrch = Scratch(params["path"])
     count = 0
     if to_pull == None:
-        to_pull = scrch.gits    
-    for gpath in to_pull:                
+        to_pull = scrch.gits
+    for gpath in to_pull:
         count += 1
-        msg = f"{count}/{len(to_pull)}:"                
+        msg = f"{count}/{len(to_pull)}:"
         if not os.path.exists(gpath):
             print(f"Path {gpath} does not exist")
             continue
-        else:            
+        else:
             msg += f"{action} from {gpath}"
             if dry:
                 print(f"Dry: would {action} {gpath}")
             else:
-                if params["multi"]:                    
+                if params["multi"]:
                     x = None
                     if action == "pull":
                         time.sleep(THROTTLE_PULL)
-                        x = threading.Thread(target=git_pull, args=(gpath, msg,file_size, debug))
+                        x = threading.Thread(target=git_pull, args=(gpath, msg,file_size, date, debug))
                     elif action == "status":
                         time.sleep(THROTTLE_STATUS)
                         x = threading.Thread(target=git_status, args=(gpath, msg,debug))
@@ -55,43 +56,43 @@ def git_pull_all(params, action, dry,debug, to_pull, file_size):
                         x.start()
                 else:
                     if action == "pull":
-                        git_pull(gpath, msg,file_size,debug)
+                        git_pull(gpath, msg,file_size, date, debug)
                     elif action == "status":
-                        git_status(gpath, msg,debug)                
+                        git_status(gpath, msg,debug)
                     elif action == "history":
-                        git_status(gpath, msg,debug)                
+                        git_status(gpath, msg,debug)
                     elif action == "filesize":
                         git_filesize(gpath, msg, file_size, True, debug)
                     elif action == "gitignore":
                         git_ignore(gpath, msg, debug)
-    if params["multi"]:        
+    if params["multi"]:
         for index, thread in enumerate(threads_to_pull):
-            thread.join()        
+            thread.join()
     if count > 0:
         print()
     print(f"{action}ed {count} projects")
     print("=====================================")
 ##################################################################################
-def git_clone_all(params, dry,debug, to_clone):    
-    threads_to_pull = list()    
-    scrch = Scratch(params["path"])            
-    count = 0    
+def git_clone_all(params, dry,debug, to_clone):
+    threads_to_pull = list()
+    scrch = Scratch(params["path"])
+    count = 0
     for phttps, gpath in to_clone:
         count += 1
-        msg = f"{count}/{len(to_clone)}:"                        
+        msg = f"{count}/{len(to_clone)}:"
         msg += f"clone from {gpath}"
         if dry:
             print(f"Dry: would 'git clone {phttps} {gpath}'")
         else:
             if params["multi"]:
-                    time.sleep(THROTTLE_PULL)                    
-                    x = None                        
+                    time.sleep(THROTTLE_PULL)
+                    x = None
                     x = threading.Thread(target=git_clone, args=(phttps, gpath, msg, debug))
                     if x != None:
                         threads_to_pull.append(x)
                         x.start()
-            else:                    
-                git_clone(phttps, gpath, msg, debug)                
+            else:
+                git_clone(phttps, gpath, msg, debug)
     if params["multi"]:
         progress = 0
         for index, thread in enumerate(threads_to_pull):
@@ -103,12 +104,12 @@ def git_clone_all(params, dry,debug, to_clone):
     print(f"cloned {count} projects")
     print("=====================================")
 ##################################################################################
-def git_clone(phttps, spath, msg, debug):        
+def git_clone(phttps, spath, msg, debug):
     keep_going = True
     count = 0
     while keep_going and count < KEEPS:
-        count += 1        
-        process = subprocess.run(["git", "clone", phttps, spath],stdout=subprocess.PIPE, stderr=subprocess.PIPE)        
+        count += 1
+        process = subprocess.run(["git", "clone", phttps, spath],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if debug:
             print(f"git clone {phttps} {spath}")
         keep_going = git_message(process, msg,True, count == KEEPS)
@@ -123,96 +124,106 @@ def git_clone(phttps, spath, msg, debug):
         print(f"\n{phttps} succeeded after {count} times")
     return True
 ##################################################################################
-def git_pull(gpath, msg, file_size, debug):           
+def git_pull(gpath, msg, file_size, date, debug):
     git_filesize(gpath, msg, file_size, False, debug)
     keep_going = True
     count = 0
     while keep_going and count < KEEPS:
-        count += 1        
-        process = subprocess.run(["git", "-C", gpath, "pull"],stdout=subprocess.PIPE, stderr=subprocess.PIPE)            
+        count += 1
+
+        print(f"\nPulling {gpath} with git pull and date={date}", end="", flush=True)
+        if date == "latest": # then we need to reattach to main to get the latest commit
+            process = subprocess.run(["git", "-C", gpath, "checkout", "main"],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        elif date != "": # assume we are asking for a date
+            commit = subprocess.check_output(["git", "-C", gpath, "rev-list", "-n", "1", f'--before={date}', "main"], text=True).strip()
+            print(f"\nChecking out commit {commit} from {gpath} before date {date}")
+            process = subprocess.run(["git", "-C", gpath, "switch", "--detach", commit], stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        else:
+            process = subprocess.run(["git", "-C", gpath, "pull"],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
         keep_going = git_message(process, msg, debug, count == KEEPS)
         if keep_going:
             #if count%20 == 0:
             #    print("Retrying", gpath, count)
             time.sleep(0.05)
     if keep_going:
-        print(f"\nFailed to pull {gpath}")    
+        print(f"\nFailed to pull {gpath}")
         return False
     elif count > 10:
         print(f"\n{gpath} succeeded after {count} times")
     return True
 ########################################################################
-def git_filesize(gpath, msg, file_size, full_msg, debug):             
+def git_filesize(gpath, msg, file_size, full_msg, debug):
     gitignore = []
     ignore_history = False
-    for root, dirs, files in os.walk(gpath):        
-        if ignore_history and '.git' in dirs:        
+    for root, dirs, files in os.walk(gpath):
+        if ignore_history and '.git' in dirs:
             dirs.remove('.git')
         for filename in files:
             file_path = Path(root) / filename.replace(gpath,"")
-            if file_path.stat().st_size > file_size:                
-                gitignore.append((str(file_path).strip(),file_path.stat().st_size))    
-    gitignore_path = Path(gpath) / ".gitignore"    
-    if len(gitignore) > 0:        
+            if file_path.stat().st_size > file_size:
+                gitignore.append((str(file_path).strip(),file_path.stat().st_size))
+    gitignore_path = Path(gpath) / ".gitignore"
+    if len(gitignore) > 0:
         if full_msg:
             print(f"\nThe following files are larger than {file_size} bytes in {gpath}:")
             for gi, sz in gitignore:
-                print("\t",sz, gi)        
+                print("\t",sz, gi)
         existing = []
         with open(gitignore_path, "a+") as f:
             f.seek(0)
-            existing = f.read().splitlines()        
-        existing = [line.strip() for line in existing]        
+            existing = f.read().splitlines()
+        existing = [line.strip() for line in existing]
         gitignore_2 = []
         for gi,sz in gitignore:
             rel_path = os.path.relpath(gi, gpath)
             if rel_path not in existing:
-                gitignore_2.append(rel_path)                
+                gitignore_2.append(rel_path)
         if len(gitignore_2) > 0:
             print(f"\tAdding {len(gitignore_2)} files to .gitignore in {gpath}")
         if not debug:
             with open(gitignore_path, "a") as f:
-                for gi in gitignore_2:                                        
+                for gi in gitignore_2:
                     print(f"\t\tNew file to add {rel_path}")
-                    f.write(gi + "\n")    
+                    f.write(gi + "\n")
     return False
-def git_ignore(gpath, msg, debug):         
-    gitignore_path = Path(gpath) / ".gitignore"    
+def git_ignore(gpath, msg, debug):
+    gitignore_path = Path(gpath) / ".gitignore"
     if gitignore_path.exists():
         print(f"\nThis repo has a gitignore {gpath}")
         with open(gitignore_path, "r") as f:
             for line in f:
                 line = line.strip()
-                if line != "": 
-                    print("\t",line)    
+                if line != "":
+                    print("\t",line)
     return False
 ##################################################################################
-def git_status(gpath, msg, debug):    
-    process = subprocess.run(["git", "-C", gpath, "status"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)    
-    git_message(process, msg, debug)    
+def git_status(gpath, msg, debug):
+    process = subprocess.run(["git", "-C", gpath, "status"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    git_message(process, msg, debug)
 ##################################################################################
-def git_history(gpath, msg, debug):    
+def git_history(gpath, msg, debug):
     process = subprocess.run(["git", "-C", gpath, "log", "-2", "--pretty=format:'%h%x09%an%x09%ad%x09%s'"],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    git_message(process, msg, debug)    
+    git_message(process, msg, debug)
 ##################################################################################
-def git_message(process, msg, debug, force_msg=False):            
+def git_message(process, msg, debug, force_msg=False):
     connection_error = False
-    out = process.stdout.decode("utf-8").strip()    
+    out = process.stdout.decode("utf-8").strip()
     err = process.stderr.decode("utf-8").strip()
 
     if "Resource temporarily unavailable" in err:
         print("\n\nAre you accidentally running on the login node?")
-        print("\tThere are not enough resources, you can turn of multithreading with --single")        
+        print("\tThere are not enough resources, you can turn of multithreading with --single")
         raise SystemExit
     if "thread failed to start" in err:
         print("\n\nAre you accidentally running on the login node?")
-        print("\tThere are not enough resources, you can turn of multithreading with --single")        
+        print("\tThere are not enough resources, you can turn of multithreading with --single")
         raise SystemExit
     if "can't start new thread" in err:
         print("\n\nAre you accidentally running on the login node?")
-        print("\tThere are not enough resources, you can turn of multithreading with --single")        
+        print("\tThere are not enough resources, you can turn of multithreading with --single")
         raise SystemExit
-        
+
     # strip out err msg from ssh key
     err = err.replace('\\220',"").replace('\\230',"").replace('\\342',"").replace('\\225',"")
     err = err.replace('\\224',"").replace('\\202',"").replace('\\233',"").replace('\\222',"")
@@ -222,17 +233,17 @@ def git_message(process, msg, debug, force_msg=False):
     err = err.replace("civil or criminal prosecution under the Computer Misuse Act (1990). By","")
     err = err.replace("continuing, you agree to abide by the terms of the ICR Acceptable Use","")
     err = err.replace("Policy (published on NEXUS). All use is monitored, and users have no","")
-    err = err.replace("implicit or explicit expectation of privacy. Please contact ICR","") 
-    err = err.replace("Information Security (infosec@icr.ac.uk) for more information.","")                    
+    err = err.replace("implicit or explicit expectation of privacy. Please contact ICR","")
+    err = err.replace("Information Security (infosec@icr.ac.uk) for more information.","")
     #err = err.replace(" ","")
-    #err = err.replace("\n","")    
+    #err = err.replace("\n","")
     if err.upper() == err.lower():
         err = ""
     #err = err.replace("\t","")
     if "Connection reset by peer" in err and not force_msg:
-        connection_error = True        
+        connection_error = True
         print("-", end="", flush=True)
-    elif "fatal: Could not read from remote repository" in err and not force_msg:        
+    elif "fatal: Could not read from remote repository" in err and not force_msg:
         connection_error = True
         print("-", end="", flush=True)
     else:
@@ -244,8 +255,8 @@ def git_message(process, msg, debug, force_msg=False):
         if out.upper() == out.lower():
             out = ""
         outs = out.split("\n")
-        out2 = "\n\t".join(outs).strip()    
-        errs = err.split("\n") 
+        out2 = "\n\t".join(outs).strip()
+        errs = err.split("\n")
         if len(errs) > 2:#skip the security message
             if "UNAUTHORISED ACCESS" in err:
                 errs = errs[11:]
@@ -253,28 +264,28 @@ def git_message(process, msg, debug, force_msg=False):
         if out2 == "" and err2 == "" and not debug:
             print(".", end="", flush=True)
         else:
-            if out2 != "":            
+            if out2 != "":
                 msg += f"\n\t{out2}"
-            if err2 != "":                        
-                if err2 != "":  
-                    msg += f"\n\t{err2}"        
+            if err2 != "":
+                if err2 != "":
+                    msg += f"\n\t{err2}"
             print("\n",msg, end="", flush=True)
     return connection_error
 ##################################################################################
 def git_change_protocol(params, new_protocol, dry, debug,token, minimal=False):
-    scrch = Scratch(params["path"])  
-    server = params["server"]          
-    to_change = scrch.gits        
+    scrch = Scratch(params["path"])
+    server = params["server"]
+    to_change = scrch.gits
     count = 0
-    for ch in to_change:        
-        git_config_file = Path(ch) / ".git" / "config"        
+    for ch in to_change:
+        git_config_file = Path(ch) / ".git" / "config"
         if not git_config_file.exists():
             print(f"Path {git_config_file} does not exist")
             continue
-        else:            
+        else:
             with open(git_config_file, "r") as f:
-                lines = f.readlines()                
-            
+                lines = f.readlines()
+
             new_lines = []
             for line in lines:
                 if "url =" in line:
@@ -290,41 +301,41 @@ def git_change_protocol(params, new_protocol, dry, debug,token, minimal=False):
                             old,line = pat_to_pat(line,token)
                             would_change = old != line
                     elif "https://" in line:
-                        if new_protocol == "pat":                            
+                        if new_protocol == "pat":
                             old,line = https_to_pat(line,token)
                             would_change = old != line
                         elif new_protocol == "ssh":
                             old,line = https_to_ssh(line, server)
-                            would_change = old != line                        
+                            would_change = old != line
                     elif "git@" in line:
                         if new_protocol == "pat":
                             old,line = ssh_to_pat(line,server, token)
                             would_change = old != line
                         elif new_protocol == "https":
-                            old,line = ssh_to_https(line, server)                                                                
+                            old,line = ssh_to_https(line, server)
                             would_change = old != line
                     if would_change:
-                        count += 1                        
+                        count += 1
                         if dry:
-                            print("would replace:", line)                        
-                        else:                            
+                            print("would replace:", line)
+                        else:
                             print("replacing:", line.strip())
-                                                    
+
                 new_lines.append(line)
-                    
+
             if not dry:
                 with open(git_config_file, "w") as f:
-                    for line in new_lines:                                                                        
-                        f.write(line)                                                                            
-    
+                    for line in new_lines:
+                        f.write(line)
+
     if count > 0:
         print(f"changed {count} repo protocols")
     return True
 ##################################################################################
 def ssh_to_pat(line, server, token):
     old = line
-    server_trunk = server.replace("https://","")            
-    line = line.replace(f"git@{server_trunk}:", f"https://oauth2:{token}@{server_trunk}/")    
+    server_trunk = server.replace("https://","")
+    line = line.replace(f"git@{server_trunk}:", f"https://oauth2:{token}@{server_trunk}/")
     return old,line
 ##################################################################################
 def https_to_pat(line,token):
@@ -334,37 +345,37 @@ def https_to_pat(line,token):
 ##################################################################################
 def https_to_ssh(line, server):
     old = line
-    server_trunk = server.replace("https://","")    
-    line = line.replace(f"https://{server_trunk}/",f"git@{server_trunk}:")    
-    line = line.replace(f"git@{server_trunk}/", f"git@{server_trunk}:")    
+    server_trunk = server.replace("https://","")
+    line = line.replace(f"https://{server_trunk}/",f"git@{server_trunk}:")
+    line = line.replace(f"git@{server_trunk}/", f"git@{server_trunk}:")
     return old,line
 ##################################################################################
 def ssh_to_https(line, server):
     old = line
     server_trunk = server.replace("https://","")
-    line = line.replace(f"git@{server_trunk}:", f"https://{server_trunk}/")    
+    line = line.replace(f"git@{server_trunk}:", f"https://{server_trunk}/")
     return old,line
 ##################################################################################
 def pat_to_ssh(line, server):
     old = line
     server_trunk = server.replace("https://","")
     lineA = line.split("https://")[0]
-    lineB = line.split("@")[1]    
-    line = lineA + "git@" + lineB    
-    line = line.replace(f"git@{server_trunk}/", f"git@{server_trunk}:")        
+    lineB = line.split("@")[1]
+    line = lineA + "git@" + lineB
+    line = line.replace(f"git@{server_trunk}/", f"git@{server_trunk}:")
     return old,line
 ##################################################################################
 def pat_to_https(line):
     old = line
     lineA = line.split("https://")[0]
-    lineB = line.split("@")[1]    
-    line = lineA + "https://" + lineB    
+    lineB = line.split("@")[1]
+    line = lineA + "https://" + lineB
     return old,line
 ##################################################################################
-def pat_to_pat(line,token):    
+def pat_to_pat(line,token):
     old = line
     lineA = line.split("https://")[0]
-    lineB = line.split("@")[1]            
+    lineB = line.split("@")[1]
     line =  lineA + f"https://oauth2:{token}@" + lineB
     return old,line
 ##################################################################################
