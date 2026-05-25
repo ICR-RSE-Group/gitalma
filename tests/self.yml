@@ -1,0 +1,5 @@
+protocol: ssh
+source: github
+server: https://github.com
+repos:
+-   TOOLS: git@github.com:instituteofcancerresearch/neoantigens.git
