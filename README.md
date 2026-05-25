@@ -71,3 +71,8 @@ repos:
 -   GENEVOD/HE: git@github.com:instituteofcancerresearch/he-class-app.git
 -   GENEVOD/HE: git@github.com:instituteofcancerresearch/he-class-pipeline.git
 ```
+
+To use a config file on github use the raw contensts, e.g.
+```bash
+gitalma init -source web -url https://raw.githubusercontent.com/ICR-RSE-Group/gitalma/refs/heads/main/tests/self.yml
+```

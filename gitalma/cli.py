@@ -50,6 +50,7 @@ def main():
     parser.add_argument("-subgroup", help="the gitlab subgroup number which is the root of the gitlab projects", type=int)
     parser.add_argument("-protocol", help="override default https clone behaviour with ssh", type=str)
     parser.add_argument("-wikis", help="Whether to look for wikis too", type=bool)
+    parser.add_argument("-url", help="The url if config is a web source (source=web)", type=str)
     parser.add_argument("-ignore_size", help="If > 0 a size to add to the .gitignore", type=int)
     parser.add_argument("-date", help='The commit before the given datetime in format "2026-05-01 23:59:59" or "latest"', type=str)
 
@@ -79,7 +80,7 @@ def main():
         scrch.home = str(scrch.path)
     new_params = init_args(scrch, args)
     repo_params = init_check_get(scrch,new_params)
-    #########################################################################################
+    #########################################################################################        
     if args.action[0] == "init":
         if scrch.gitalma:
             print("Already initialised in", scrch.home)
@@ -87,10 +88,16 @@ def main():
         elif scrch.gitalmaparent:
             print("Can't init parent - there are child gitalma repositories below this")
             exit()
-        else:
-            changed_params = init_save(new_params, repo_params)
-            init_print(changed_params, init=True)
-            exit()
+        
+        else:                
+            if new_params["source"].lower() == "web":                
+                changed_params = init_web(new_params, repo_params)
+                init_print(changed_params, init=True)
+                exit()
+            else:        
+                changed_params = init_save(new_params, repo_params)
+                init_print(changed_params, init=True)
+                exit()
     #########################################################################################
     new_init_params = {"path": scrch.working,
                       "home": scrch.working,
