@@ -2,4 +2,4 @@ protocol: ssh
 source: github
 server: https://github.com
 repos:
--   TOOLS: git@github.com:instituteofcancerresearch/neoantigens.git
+-   TOOLS: git@github.com:ICR-RSE-Group/gitalma.git
