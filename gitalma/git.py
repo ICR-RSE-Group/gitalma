@@ -131,7 +131,8 @@ def git_pull(gpath, msg, file_size, date, debug):
     while keep_going and count < KEEPS:
         count += 1
 
-        print(f"\nPulling {gpath} with git pull and date={date}", end="", flush=True)
+        if date != "":
+            print(f"\nPulling {gpath} with git pull and date={date}", end="", flush=True)
         if date == "latest": # then we need to reattach to main to get the latest commit
             process = subprocess.run(["git", "-C", gpath, "checkout", "main"],stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         elif date != "": # assume we are asking for a date

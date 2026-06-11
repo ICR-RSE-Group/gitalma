@@ -21,6 +21,7 @@ gitlab.py -path /path/for/repo/bcrbioinformatics -include Team,Manuscripts,Gener
 import argparse
 import os
 import datetime
+import resource
 from .init import *
 from .gitlab import *
 from .git import *
@@ -30,6 +31,12 @@ from .versions import *
 
 thisversion = "0.0.0"
 gversion = "0.0.0"
+
+soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
+target = min(1024, hard)
+if soft < target:
+    # Raise soft limit (can go up to hard limit without root)
+    resource.setrlimit(resource.RLIMIT_NOFILE, (target, hard))
 
 def main():
     parser = argparse.ArgumentParser(description="GitLab pull or clone",
