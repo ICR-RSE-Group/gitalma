@@ -94,7 +94,7 @@ def init_web(new_params, orig_params):
                 print(f"Got {key} from web source with value {value}")        
     # now do a sanity check on the matching names of the path and groupip
     if changed_params["source"] in ["gitlab","icr"]:
-        api = GitLabAPI(changed_params["subgroup"],changed_params["server"], changed_params["wikis"], minimal)
+        api = GitLabAPI(changed_params["subgroup"],changed_params["server"], changed_params["wikis"], True)
         gp, rp = api.get_id_repo()
         changed_params["subgroup"] = gp
         changed_params["repo"] = rp
